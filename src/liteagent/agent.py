@@ -36,13 +36,12 @@ class Agent:
         # 如果有工具，添加工具使用说明
         if self.tools:
             tool_names = [tool.name for tool in self.tools]
-            system_content += f"\n\n你可以使用以下工具: {', '.join(tool_names)}"
+            system_content += (
+                f"\n\n你可以使用以下工具: {', '.join(tool_names)}"
+            )
             system_content += "\n当需要使用工具时，请调用相应的函数。"
 
-        return {
-            "role": "system",
-            "content": system_content
-        }
+        return {"role": "system", "content": system_content}
 
     def get_tools_schema(self) -> List[Dict[str, Any]]:
         """获取工具的schema定义"""

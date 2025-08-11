@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+        "ms-python.vscode-pylance",
+        "littlefoxteam.vscode-python-test-adapter",
+        "njpwerner.autodocstring",
+        "ms-vscode.test-adapter-converter"
+    ]
+}

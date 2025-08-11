@@ -1393,6 +1393,7 @@ dev = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "liteagent" },
     { name = "mypy", version = "1.14.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "mypy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "pyright" },
@@ -1419,6 +1420,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "liteagent", editable = "." },
     { name = "mypy", specifier = ">=1.14.1" },
     { name = "pyright", specifier = ">=1.1.403" },
     { name = "pytest", specifier = ">=8.3.5" },

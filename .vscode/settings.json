@@ -1,0 +1,29 @@
+{
+    "python.defaultInterpreter": "./.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestPath": "./.venv/bin/pytest",
+    "python.testing.pytestArgs": [
+        "tests",
+        "--no-cov"  // 禁用覆盖率，覆盖率工具可能干扰调试
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.ruffEnabled": true,
+    "python.linting.ruffPath": "./.venv/bin/ruff",
+    "python.formatting.provider": "none",
+    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.extraPaths": [
+        "./src"
+    ],
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        ".pytest_cache": true,
+        ".coverage": true,
+        "htmlcov": true,
+        "dist": true,
+        "*.egg-info": true
+    }
+}

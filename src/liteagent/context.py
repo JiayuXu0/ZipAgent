@@ -7,11 +7,12 @@ from typing import Any, Dict, List
 @dataclass
 class Usage:
     """Token使用统计"""
+
     input_tokens: int = 0
     output_tokens: int = 0
     total_tokens: int = 0
 
-    def add(self, other: 'Usage') -> None:
+    def add(self, other: "Usage") -> None:
         """累加使用量"""
         self.input_tokens += other.input_tokens
         self.output_tokens += other.output_tokens
@@ -38,28 +39,36 @@ class Context:
             message.update(kwargs)
         self.messages.append(message)
 
-    def add_tool_call(self, tool_name: str, arguments: Dict[str, Any], result: Any) -> None:
+    def add_tool_call(
+        self, tool_name: str, arguments: Dict[str, Any], result: Any
+    ) -> None:
         """添加工具调用记录"""
         # 添加助手的工具调用消息
-        self.messages.append({
-            "role": "assistant",
-            "content": None,
-            "tool_calls": [{
-                "id": f"call_{len(self.messages)}",
-                "type": "function",
-                "function": {
-                    "name": tool_name,
-                    "arguments": str(arguments)
-                }
-            }]
-        })
+        self.messages.append(
+            {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": f"call_{len(self.messages)}",
+                        "type": "function",
+                        "function": {
+                            "name": tool_name,
+                            "arguments": str(arguments),
+                        },
+                    }
+                ],
+            }
+        )
 
         # 添加工具执行结果
-        self.messages.append({
-            "role": "tool",
-            "content": str(result),
-            "tool_call_id": f"call_{len(self.messages) - 1}"
-        })
+        self.messages.append(
+            {
+                "role": "tool",
+                "content": str(result),
+                "tool_call_id": f"call_{len(self.messages) - 1}",
+            }
+        )
 
     def get_messages_for_api(self) -> List[Dict[str, Any]]:
         """获取适合API调用的消息格式"""

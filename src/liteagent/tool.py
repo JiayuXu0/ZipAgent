@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, Optional, Union, get_type_hints
 @dataclass
 class ToolResult:
     """工具执行结果"""
+
     name: str
     arguments: Dict[str, Any]
     result: Any
@@ -18,7 +19,9 @@ class ToolResult:
 class Tool:
     """工具基类"""
 
-    def __init__(self, name: str, description: str, function: Callable[..., Any]):
+    def __init__(
+        self, name: str, description: str, function: Callable[..., Any]
+    ):
         self.name = name
         self.description = description
         self.function = function
@@ -49,7 +52,7 @@ class Tool:
 
             properties[param_name] = {
                 "type": prop_type,
-                "description": f"Parameter {param_name}"
+                "description": f"Parameter {param_name}",
             }
 
             # 检查是否为必需参数
@@ -64,9 +67,9 @@ class Tool:
                 "parameters": {
                     "type": "object",
                     "properties": properties,
-                    "required": required
-                }
-            }
+                    "required": required,
+                },
+            },
         }
 
     def execute(self, arguments: Dict[str, Any]) -> ToolResult:
@@ -77,7 +80,7 @@ class Tool:
                 name=self.name,
                 arguments=arguments,
                 result=result,
-                success=True
+                success=True,
             )
         except Exception as e:
             return ToolResult(
@@ -85,7 +88,7 @@ class Tool:
                 arguments=arguments,
                 result=None,
                 success=False,
-                error=str(e)
+                error=str(e),
             )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -112,6 +115,7 @@ def function_tool(
     def my_func(x: int) -> str:
         return str(x)
     """
+
     def decorator(f: Callable[..., Any]) -> Tool:
         tool_name = name or f.__name__
         tool_description = description or f.__doc__ or f"Function {f.__name__}"

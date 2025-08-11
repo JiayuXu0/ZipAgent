@@ -32,6 +32,9 @@ uv add litellm pydantic
 
 # 安装开发依赖（可选）
 uv add --dev pyright ruff pytest pytest-cov pytest-asyncio
+
+# 以可编辑模式安装包（用于运行示例代码）
+uv add --dev --editable .
 ```
 
 ### 从预构建的 wheel 包安装
@@ -150,20 +153,24 @@ agent = Agent(
 
 ## 环境配置
 
-创建 `.env` 文件配置 API 密钥：
+创建 `.env` 文件配置 API 密钥（参考 `.env.example`）：
 
 ```bash
-# OpenAI
-MODEL=gpt-3.5-turbo
-OPENAI_API_KEY=your_api_key
+# 复制示例配置
+cp .env.example .env
 
-# 或其他提供商（通过 LiteLLM）
-MODEL=claude-2
-ANTHROPIC_API_KEY=your_api_key
+# 编辑 .env 文件，填入你的配置
+# 示例：使用阿里云Qwen API
+MODEL=openai/qwen3-30b-a3b-instruct-2507
+API_KEY=sk-your-api-key-here
+BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
-# 自定义 API 端点
-BASE_URL=https://your-api-endpoint.com
+# 可选参数
+MAX_TOKENS=1000
+TEMPERATURE=0.7
 ```
+
+示例代码会自动加载项目根目录的 `.env` 文件。
 
 ## 开发
 

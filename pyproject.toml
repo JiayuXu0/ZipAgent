@@ -78,7 +78,7 @@ reportOptionalCall = false
 
 [tool.ruff]
 target-version = "py38"
-line-length = 100
+line-length = 79  # 设置为79字符换行
 indent-width = 4
 
 [tool.ruff.lint]
@@ -148,8 +148,12 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
+[tool.uv.sources]
+liteagent = { workspace = true }
+
 [dependency-groups]
 dev = [
+    "liteagent",
     "mypy>=1.14.1",
     "pyright>=1.1.403",
     "pytest>=8.3.5",

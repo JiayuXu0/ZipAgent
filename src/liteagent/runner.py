@@ -15,7 +15,7 @@ class RunResult:
         content: str,
         context: Context,
         success: bool = True,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ):
         self.content = content
         self.context = context
@@ -33,8 +33,12 @@ class Runner:
     """Agent运行器 - 核心执行引擎"""
 
     @staticmethod
-    def run(agent: Agent, user_input: str, context: Optional[Context] = None,
-            max_turns: int = 10) -> RunResult:
+    def run(
+        agent: Agent,
+        user_input: str,
+        context: Optional[Context] = None,
+        max_turns: int = 10,
+    ) -> RunResult:
         """
         运行Agent处理用户输入
 
@@ -87,23 +91,31 @@ class Runner:
                         tool_name = tool_call["function"]["name"]
 
                         try:
-                            arguments = json.loads(tool_call["function"]["arguments"])
+                            arguments = json.loads(
+                                tool_call["function"]["arguments"]
+                            )
                         except json.JSONDecodeError:
                             # 如果JSON解析失败，尝试eval（简单处理）
                             try:
-                                arguments = eval(tool_call["function"]["arguments"])
+                                arguments = eval(
+                                    tool_call["function"]["arguments"]
+                                )
                             except Exception:
                                 arguments = {}
 
                         # 查找并执行工具
                         tool = agent.find_tool(tool_name)
                         if tool:
-                            print(f"[DEBUG] 执行工具: {tool_name}({arguments})")
+                            print(
+                                f"[DEBUG] 执行工具: {tool_name}({arguments})"
+                            )
                             tool_result = tool.execute(arguments)
 
                             if tool_result.success:
                                 # 将工具调用和结果添加到上下文
-                                context.add_tool_call(tool_name, arguments, tool_result.result)
+                                context.add_tool_call(
+                                    tool_name, arguments, tool_result.result
+                                )
                                 has_tool_results = True
                             else:
                                 # 工具执行失败
@@ -126,7 +138,9 @@ class Runner:
                 # 如果既没有工具调用，也没有文本回复，说明出现了问题
                 if not response.tool_calls:
                     error_msg = "模型没有返回任何内容"
-                    return RunResult("", context, success=False, error=error_msg)
+                    return RunResult(
+                        "", context, success=False, error=error_msg
+                    )
 
             # 超过最大轮次
             error_msg = f"达到最大执行轮次 ({max_turns})，可能存在无限循环"
@@ -158,7 +172,7 @@ class Runner:
             while True:
                 user_input = input("\n你: ").strip()
 
-                if user_input.lower() in ['quit', 'exit', '退出', 'q']:
+                if user_input.lower() in ["quit", "exit", "退出", "q"]:
                     break
 
                 if not user_input:
