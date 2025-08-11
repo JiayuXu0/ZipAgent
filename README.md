@@ -11,7 +11,7 @@
 - 🚀 **轻量级设计** - 核心代码简洁，易于理解和扩展
 - 🔧 **模块化架构** - 清晰的模块划分，各组件职责单一
 - 🎯 **完整类型支持** - 全面的类型注解，提高代码质量
-- 🔌 **灵活的模型接口** - 支持多种 LLM 提供商（通过 LiteLLM）
+- 🔌 **灵活的模型接口** - 支持 OpenAI 兼容的 API
 - 🛠️ **优雅的工具系统** - 使用装饰器模式简化工具创建
 - 📊 **上下文管理** - 完整的对话历史和 token 统计
 
@@ -28,7 +28,7 @@ git clone https://github.com/JiayuXu0/LiteAgent.git
 cd LiteAgent
 
 # uv 会自动创建虚拟环境并安装依赖
-uv add litellm pydantic
+uv add openai pydantic
 
 # 安装开发依赖（可选）
 uv add --dev pyright ruff pytest pytest-cov pytest-asyncio
@@ -182,7 +182,7 @@ git clone https://github.com/JiayuXu0/LiteAgent.git
 cd LiteAgent
 
 # 使用 uv 安装核心依赖
-uv add litellm pydantic
+uv add openai pydantic
 
 # 安装开发工具
 uv add --dev pyright ruff pytest pytest-cov pytest-asyncio
@@ -282,7 +282,7 @@ LiteAgent/
 
 ## 致谢
 
-- 基于 [LiteLLM](https://github.com/BerriAI/litellm) 提供多模型支持
+- 基于 [OpenAI 客户端](https://github.com/openai/openai-python) 提供 API 支持
 - 使用 [uv](https://github.com/astral-sh/uv) 进行现代化包管理
 - 使用 [Ruff](https://github.com/astral-sh/ruff) 进行代码质量控制
 - 使用 [PyRight](https://github.com/microsoft/pyright) 进行静态类型检查

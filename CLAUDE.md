@@ -10,7 +10,7 @@ LiteAgent 是一个轻量级的 AI Agent 框架，设计简洁且易于扩展。
 ### 模块结构
 - **agent.py**: Agent 核心类，管理代理配置、指令和工具集
 - **context.py**: 对话上下文管理，维护消息历史和 token 统计
-- **model.py**: LLM 接口抽象层，基于 LiteLLM 支持多种模型
+- **model.py**: LLM 接口抽象层，基于 OpenAI 客户端
 - **runner.py**: 执行引擎，处理工具调用循环和对话流程
 - **tool.py**: 工具系统，支持函数装饰器自动转换
 
@@ -32,7 +32,7 @@ cd LiteAgent
 
 # uv 会自动创建虚拟环境并管理依赖
 # 添加核心依赖
-uv add litellm pydantic
+uv add openai pydantic
 
 # 添加开发依赖
 uv add --dev pyright ruff pytest pytest-cov pytest-asyncio
@@ -219,7 +219,7 @@ git clone https://github.com/JiayuXu0/LiteAgent.git
 cd LiteAgent
 
 # 2. 使用 uv 管理依赖
-uv add litellm pydantic
+uv add openai pydantic
 uv add --dev pyright ruff pytest pytest-cov pytest-asyncio
 
 # 3. 运行代码质量检查
@@ -268,4 +268,4 @@ print(result.content)
 - ✅ **类型安全**: 完整的类型注解和 pyright 检查
 - ✅ **代码质量**: ruff 代码风格检查和格式化
 - ✅ **模块化架构**: 易于扩展和维护
-- ✅ **多模型支持**: 通过 LiteLLM 支持多种 LLM 提供商
+- ✅ **OpenAI 支持**: 通过 OpenAI 客户端支持 OpenAI 兼容 API

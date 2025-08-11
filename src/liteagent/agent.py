@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from .model import LiteLLMModel, Model
+from .model import Model, OpenAIModel
 from .tool import Tool
 
 
@@ -25,9 +25,9 @@ class Agent:
 
     def __post_init__(self) -> None:
         """初始化后处理"""
-        # 如果没有指定模型，使用默认的LiteLLM模型
+        # 如果没有指定模型，使用默认的OpenAI模型
         if self.model is None:
-            self.model = LiteLLMModel()
+            self.model = OpenAIModel()
 
     def get_system_message(self) -> Dict[str, str]:
         """获取系统消息"""

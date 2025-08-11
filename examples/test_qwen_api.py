@@ -4,8 +4,10 @@
 """
 
 import os
-from dotenv import load_dotenv, find_dotenv
-from liteagent import Agent, LiteLLMModel, Runner, function_tool
+
+from dotenv import find_dotenv, load_dotenv
+
+from liteagent import Agent, OpenAIModel, Runner, function_tool
 
 # 自动查找并加载.env文件（从当前目录向上查找）
 load_dotenv(find_dotenv())
@@ -17,7 +19,7 @@ if not os.getenv("API_KEY"):
     print("参考.env.example创建你的.env文件")
 
 # 从环境变量创建模型配置
-qwen_model = LiteLLMModel(
+qwen_model = OpenAIModel(
     model_name=os.getenv("MODEL"),
     api_key=os.getenv("API_KEY"),
     base_url=os.getenv("BASE_URL"),

@@ -34,13 +34,13 @@ class Model(ABC):
         pass
 
 
-class LiteLLMModel(Model):
-    """基于LiteLLM的模型实现，支持多种模型提供商"""
+class OpenAIModel(Model):
+    """基于原生OpenAI的模型实现"""
 
     def __init__(self, model_name: Optional[str] = None, api_key: Optional[str] = None,
                  base_url: Optional[str] = None, **kwargs: Any):
         """
-        初始化LiteLLM模型
+        初始化OpenAI模型
 
         Args:
             model_name: 模型名称，如果不指定会从环境变量MODEL读取
@@ -49,36 +49,40 @@ class LiteLLMModel(Model):
             **kwargs: 其他参数
         """
         try:
-            import litellm  # noqa: F401
+            from openai import OpenAI
 
             # 从环境变量或参数获取配置
             self.model_name = model_name or os.getenv("MODEL", "gpt-3.5-turbo")
             self.api_key = api_key or os.getenv("API_KEY")
             self.base_url = base_url or os.getenv("BASE_URL")
 
-            # 构建kwargs
-            self.kwargs = kwargs.copy()
+            # 构建客户端参数
+            client_kwargs = {}
             if self.api_key:
-                self.kwargs["api_key"] = self.api_key
+                client_kwargs["api_key"] = self.api_key
             if self.base_url:
-                self.kwargs["base_url"] = self.base_url
+                client_kwargs["base_url"] = self.base_url
+
+            # 创建OpenAI客户端
+            self.client = OpenAI(**client_kwargs)
+
+            # 其他参数
+            self.kwargs = kwargs.copy()
 
         except ImportError as e:
-            raise ImportError("需要安装litellm包: pip install litellm") from e
+            raise ImportError("需要安装openai包: pip install openai") from e
 
     def generate(self, messages: List[Dict[str, Any]],
                 tools: Optional[List[Dict[str, Any]]] = None) -> ModelResponse:
-        """调用LiteLLM生成响应"""
+        """调用OpenAI生成响应"""
         try:
-            import litellm
-
             # 准备API调用参数
             call_kwargs = {
                 "model": self.model_name,
                 "messages": messages,
                 "temperature": 0.7,
                 "max_tokens": 1000,
-                **self.kwargs  # 包含api_key等参数
+                **self.kwargs
             }
 
             # 如果有工具，添加到请求中
@@ -86,21 +90,20 @@ class LiteLLMModel(Model):
                 call_kwargs["tools"] = tools
                 call_kwargs["tool_choice"] = "auto"
 
-            # 调用LiteLLM API
-            response = litellm.completion(**call_kwargs)
+            # 调用OpenAI API
+            response = self.client.chat.completions.create(**call_kwargs)
 
             # 解析响应
             message = response.choices[0].message
-            content = message.content if hasattr(message, 'content') else None
+            content = message.content
             tool_calls: List[Dict[str, Any]] = []
 
             # 处理工具调用
-            if hasattr(message, 'tool_calls') and message.tool_calls:
-                tool_calls = []
+            if message.tool_calls:
                 for call in message.tool_calls:
                     tool_call = {
-                        "id": getattr(call, 'id', f"call_{len(tool_calls)}"),
-                        "type": getattr(call, 'type', 'function'),
+                        "id": call.id,
+                        "type": call.type,
                         "function": {
                             "name": call.function.name,
                             "arguments": call.function.arguments
@@ -110,16 +113,16 @@ class LiteLLMModel(Model):
 
             # 解析使用量
             usage = Usage()
-            if hasattr(response, 'usage') and response.usage:
-                usage.input_tokens = getattr(response.usage, 'prompt_tokens', 0) or 0
-                usage.output_tokens = getattr(response.usage, 'completion_tokens', 0) or 0
-                usage.total_tokens = getattr(response.usage, 'total_tokens', 0) or 0
+            if response.usage:
+                usage.input_tokens = response.usage.prompt_tokens or 0
+                usage.output_tokens = response.usage.completion_tokens or 0
+                usage.total_tokens = response.usage.total_tokens or 0
 
             return ModelResponse(
                 content=content,
                 tool_calls=tool_calls,
                 usage=usage,
-                finish_reason=getattr(response.choices[0], 'finish_reason', 'stop') or "stop"
+                finish_reason=response.choices[0].finish_reason or "stop"
             )
 
         except Exception as e:
@@ -132,5 +135,5 @@ class LiteLLMModel(Model):
             )
 
 
-# 为了兼容性，提供OpenAI别名
-OpenAIModel = LiteLLMModel
+# 为了向后兼容，保持LiteLLMModel别名
+LiteLLMModel = OpenAIModel

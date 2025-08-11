@@ -3,7 +3,7 @@
 from unittest.mock import Mock
 
 from liteagent import Agent, Tool
-from liteagent.model import LiteLLMModel
+from liteagent.model import OpenAIModel
 
 
 class TestAgent:
@@ -29,7 +29,7 @@ class TestAgent:
             instructions="测试指令"
         )
 
-        assert isinstance(agent.model, LiteLLMModel)
+        assert isinstance(agent.model, OpenAIModel)
 
     def test_get_system_message_without_tools(self, sample_agent: Agent) -> None:
         """测试获取系统消息（无工具）"""
