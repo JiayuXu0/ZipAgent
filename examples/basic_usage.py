@@ -47,6 +47,17 @@ def main():
     result = Runner.run(agent, "计算 (100 + 200) * 3 / 2")
     print("问: 计算 (100 + 200) * 3 / 2")
     print(f"答: {result.content}")
+    print()
+
+    # 示例3：启用思考模式
+    print("🧠 启用思考模式:")
+    result = Runner.run(
+        agent, 
+        "计算 50 * 6", 
+        thinking_tool_mode=True  # 启用思考模式
+    )
+    print("问: 计算 50 * 6 (思考模式)")
+    print(f"答: {result.content}")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
 """Model - LLM交互接口模块"""
 
+import json
 import os
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
@@ -72,8 +74,57 @@ class OpenAIModel(Model):
         except ImportError as e:
             raise ImportError("需要安装openai包: pip install openai") from e
 
+    def _parse_custom_tool_calls(self, content: str) -> tuple[List[Dict[str, Any]], str]:
+        """解析自定义 <tool_call> 标签格式的工具调用，返回工具调用和清理后的内容"""
+        tool_calls = []
+
+        # 使用正则表达式匹配 <tool_call>...</tool_call> 块
+        tool_pattern = r'<tool_call>\s*<name>([^<]+)</name>\s*<args>(.*?)</args>\s*</tool_call>'
+        matches = re.findall(tool_pattern, content, re.DOTALL)
+
+        # 保存原始内容，用于提取非工具调用部分
+        cleaned_content = content
+
+        for i, (tool_name, args_xml) in enumerate(matches):
+            tool_name = tool_name.strip()
+
+            # 解析参数 XML
+            arguments = {}
+            if args_xml.strip():
+                # 匹配参数格式: <param_name>value</param_name>
+                arg_pattern = r'<([^>]+)>([^<]*)</([^>]+)>'
+                arg_matches = re.findall(arg_pattern, args_xml)
+
+                for arg_name, arg_value, _ in arg_matches:
+                    arguments[arg_name.strip()] = arg_value.strip()
+
+            # 构建工具调用对象
+            tool_call = {
+                "id": f"call_{i}_{tool_name}",
+                "type": "function",
+                "function": {
+                    "name": tool_name,
+                    "arguments": json.dumps(arguments)
+                }
+            }
+            tool_calls.append(tool_call)
+
+            # 从内容中移除工具调用标签，保留思考过程和其他文本
+            tool_call_pattern = r'<tool_call>\s*<name>' + re.escape(tool_name) + r'</name>\s*<args>.*?</args>\s*</tool_call>'
+            cleaned_content = re.sub(tool_call_pattern, '', cleaned_content, flags=re.DOTALL)
+
+        # 移除thinking标签但保留内容
+        cleaned_content = re.sub(r'<thinking>\s*', '', cleaned_content)
+        cleaned_content = re.sub(r'\s*</thinking>', '', cleaned_content)
+        
+        # 清理多余的空行
+        cleaned_content = re.sub(r'\n\s*\n\s*\n', '\n\n', cleaned_content.strip())
+
+        return tool_calls, cleaned_content
+
     def generate(self, messages: List[Dict[str, Any]],
-                tools: Optional[List[Dict[str, Any]]] = None) -> ModelResponse:
+                tools: Optional[List[Dict[str, Any]]] = None,
+                use_native_tools: bool = True) -> ModelResponse:
         """调用OpenAI生成响应"""
         try:
             # 准备API调用参数
@@ -85,8 +136,8 @@ class OpenAIModel(Model):
                 **self.kwargs
             }
 
-            # 如果有工具，添加到请求中
-            if tools:
+            # 只有在使用原生工具调用时才添加工具参数
+            if tools and use_native_tools:
                 call_kwargs["tools"] = tools
                 call_kwargs["tool_choice"] = "auto"
 
@@ -99,7 +150,8 @@ class OpenAIModel(Model):
             tool_calls: List[Dict[str, Any]] = []
 
             # 处理工具调用
-            if message.tool_calls:
+            if use_native_tools and message.tool_calls:
+                # 使用OpenAI原生工具调用
                 for call in message.tool_calls:
                     tool_call = {
                         "id": call.id,
@@ -110,6 +162,9 @@ class OpenAIModel(Model):
                         }
                     }
                     tool_calls.append(tool_call)
+            elif not use_native_tools and content:
+                # 解析自定义 <tool_call> 标签，获取工具调用和清理后的内容
+                tool_calls, content = self._parse_custom_tool_calls(content)
 
             # 解析使用量
             usage = Usage()
