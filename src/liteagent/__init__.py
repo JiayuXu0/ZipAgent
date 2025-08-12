@@ -3,7 +3,8 @@
 from .agent import Agent
 from .context import Context
 from .model import LiteLLMModel, Model, OpenAIModel
-from .runner import Runner
+from .runner import Runner, RunResult
+from .stream import StreamEvent, StreamEventType
 from .tool import Tool, function_tool
 
 __version__ = "0.1.0"
@@ -14,7 +15,10 @@ __all__ = [
     "LiteLLMModel",
     "Model",
     "OpenAIModel",
+    "RunResult",
     "Runner",
+    "StreamEvent",
+    "StreamEventType",
     "Tool",
     "function_tool",
 ]
