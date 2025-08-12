@@ -74,7 +74,7 @@ def demo_with_deltas():
 
     try:
         # 使用逐字符流式方法（虽然目前实现还不完整）
-        for event in Runner.run_stream_char(agent, question):
+        for event in Runner.run_stream(agent, question):
             if event.type == StreamEventType.QUESTION:
                 print(f"📋 收到问题: {event.content}")
 

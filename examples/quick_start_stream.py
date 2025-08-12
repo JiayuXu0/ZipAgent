@@ -37,7 +37,7 @@ def demo_simple_chat():
     print("🤖 助手: ", end="", flush=True)
 
     # 逐字符显示回答
-    for event in Runner.run_stream_char(agent, "请用一句话介绍Python"):
+    for event in Runner.run_stream(agent, "请用一句话介绍Python"):
         if event.type == StreamEventType.ANSWER_DELTA:
             print(event.content, end="", flush=True)
             time.sleep(0.03)  # 控制显示速度
@@ -57,7 +57,7 @@ def demo_tool_thinking():
         tools=[calculate],
     )
 
-    for event in Runner.run_stream_char(agent, "计算 (50 + 30) × 4"):
+    for event in Runner.run_stream(agent, "计算 (50 + 30) × 4"):
         if event.type == StreamEventType.THINKING_DELTA:
             # 思考过程用灰色显示（如果终端支持）
             print(f"\033[90m{event.content}\033[0m", end="", flush=True)
@@ -112,11 +112,11 @@ def main():
     print("📚 使用方法总结:")
     print()
     print("1️⃣ 逐字符流式输出（推荐）:")
-    print("   for event in Runner.run_stream_char(agent, question):")
+    print("   for event in Runner.run_stream(agent, question):")
     print("       if event.type == StreamEventType.ANSWER_DELTA:")
     print("           print(event.content, end='', flush=True)")
     print()
-    print("2️⃣ 段落级流式输出:")
+    print("2️⃣ 完整回答:")
     print("   for event in Runner.run_stream(agent, question):")
     print("       if event.type == StreamEventType.ANSWER:")
     print("           print(event.content)")
@@ -125,9 +125,9 @@ def main():
     print("   Runner.run(agent, question, stream_callback=handler)")
     print()
     print("💡 选择建议:")
-    print("   • CLI应用: 使用逐字符流式 (run_stream_char)")
+    print("   • CLI应用: 使用逐字符流式 (run_stream)")
     print("   • Web应用: 使用回调方式 (stream_callback)")
-    print("   • 简单场景: 使用段落流式 (run_stream)")
+    print("   • 简单场景: 使用完整回答显示")
 
 
 if __name__ == "__main__":

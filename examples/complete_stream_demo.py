@@ -113,7 +113,7 @@ def demo_2_char_stream():
     print(f"💬 问题：{question}\n")
     print("🤖 回答：", end="", flush=True)
 
-    for event in Runner.run_stream_char(agent, question):
+    for event in Runner.run_stream(agent, question):
         if event.type == StreamEventType.ANSWER_DELTA:
             print(event.content, end="", flush=True)
             time.sleep(0.03)  # 控制打字速度
@@ -176,7 +176,7 @@ def demo_4_tool_with_stream():
     current_thinking = ""
     current_answer = ""
 
-    for event in Runner.run_stream_char(agent, question):
+    for event in Runner.run_stream(agent, question):
         if event.type == StreamEventType.QUESTION:
             print(f"📝 问题：{event.content}")
 
@@ -286,7 +286,7 @@ def demo_6_performance_comparison():
     traditional_time = time.time() - start_time
     print(f"⏱️ 耗时：{traditional_time:.2f}秒，字符数：{len(result.content)}")
 
-    # 2. 段落级流式
+    # 2. 逐字符流式（仅计时，不实际显示）
     print("\n2️⃣ 段落级流式（立即显示完整段落）")
     start_time = time.time()
     for event in Runner.run_stream(agent, question):
@@ -299,7 +299,7 @@ def demo_6_performance_comparison():
     print("\n3️⃣ 逐字符流式（打字效果）")
     start_time = time.time()
     char_count = 0
-    for event in Runner.run_stream_char(agent, question):
+    for event in Runner.run_stream(agent, question):
         if event.type == StreamEventType.ANSWER_DELTA:
             char_count += len(event.content)
         elif event.type == StreamEventType.ANSWER:
@@ -333,23 +333,6 @@ def main():
         choice = input("🤔 是否要体验交互式聊天？(y/N): ").strip().lower()
         if choice in ["y", "yes", "是"]:
             demo_5_interactive_chat()
-
-        print("\n" + "=" * 60)
-        print("🎯 演示总结")
-        print("=" * 60)
-        print("✅ 已展示的功能：")
-        print("  • 段落级流式输出 - 适合快速展示结果")
-        print("  • 逐字符流式输出 - 最佳用户体验")
-        print("  • 回调式流式输出 - 适合复杂处理逻辑")
-        print("  • 工具调用 + 流式 - 展示AI思考过程")
-        print("  • 交互式应用 - 实际使用场景")
-        print("  • 性能对比 - 不同方式的优劣")
-
-        print("\n💡 使用建议：")
-        print("  • CLI应用：使用逐字符流式提升体验")
-        print("  • Web应用：使用回调式流式处理")
-        print("  • 调试场景：使用段落级流式快速查看")
-        print("  • 生产环境：根据具体需求选择合适方式")
 
     except KeyboardInterrupt:
         print("\n\n⏹️ 演示被用户中断")
