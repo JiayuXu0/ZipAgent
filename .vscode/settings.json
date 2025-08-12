@@ -12,7 +12,17 @@
     "python.linting.ruffEnabled": true,
     "python.linting.ruffPath": "./.venv/bin/ruff",
     "python.formatting.provider": "none",
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "explicit",
+        "source.organizeImports.ruff": "explicit"
+    },
     "python.analysis.typeCheckingMode": "off",
+    "pylsp.plugins.pycodestyle.enabled": false,
+    "pylsp.plugins.pylint.enabled": false,
     "python.analysis.autoImportCompletions": true,
     "python.analysis.diagnosticMode": "openFilesOnly",
     "python.analysis.diagnosticSeverityOverrides": {
@@ -43,7 +53,8 @@
         "reportIndexIssue": "none",
         "reportRedeclaration": "none",
         "reportReturnType": "none",
-        "reportOperatorIssue": "none"
+        "reportOperatorIssue": "none",
+        "reportUnknownMemberType": "none"
     },
     "python.analysis.extraPaths": [
         "./src"

@@ -125,13 +125,13 @@ def demo_2_char_stream():
 def demo_3_callback_stream():
     """演示3：回调式流式输出"""
     print("\n" + "=" * 60)
-    print("📞 演示3：回调式流式输出")
+    print("📞 演示3:回调式流式输出")
     print("=" * 60)
 
     agent = create_simple_agent()
     question = "请解释机器学习的基本概念"
 
-    print(f"💬 问题：{question}\n")
+    print(f"💬 问题:{question}\n")
 
     # 定义流式处理器
     class StreamProcessor:
