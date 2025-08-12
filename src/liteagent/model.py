@@ -10,6 +10,7 @@ from .context import Usage
 # 尝试加载环境变量
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass  # dotenv不是必需的依赖
@@ -18,6 +19,7 @@ except ImportError:
 @dataclass
 class ModelResponse:
     """模型响应结果"""
+
     content: Optional[str]
     tool_calls: List[Dict[str, Any]]
     usage: Usage
@@ -28,8 +30,11 @@ class Model(ABC):
     """LLM模型抽象基类"""
 
     @abstractmethod
-    def generate(self, messages: List[Dict[str, Any]],
-                tools: Optional[List[Dict[str, Any]]] = None) -> ModelResponse:
+    def generate(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+    ) -> ModelResponse:
         """生成模型响应"""
         pass
 
@@ -37,8 +42,13 @@ class Model(ABC):
 class OpenAIModel(Model):
     """基于原生OpenAI的模型实现"""
 
-    def __init__(self, model_name: Optional[str] = None, api_key: Optional[str] = None,
-                 base_url: Optional[str] = None, **kwargs: Any):
+    def __init__(
+        self,
+        model_name: Optional[str] = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        **kwargs: Any,
+    ):
         """
         初始化OpenAI模型
 
@@ -72,8 +82,11 @@ class OpenAIModel(Model):
         except ImportError as e:
             raise ImportError("需要安装openai包: pip install openai") from e
 
-    def generate(self, messages: List[Dict[str, Any]],
-                tools: Optional[List[Dict[str, Any]]] = None) -> ModelResponse:
+    def generate(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+    ) -> ModelResponse:
         """调用OpenAI生成响应"""
         try:
             # 准备API调用参数
@@ -82,7 +95,7 @@ class OpenAIModel(Model):
                 "messages": messages,
                 "temperature": 0.7,
                 "max_tokens": 1000,
-                **self.kwargs
+                **self.kwargs,
             }
 
             # 如果有工具，添加到请求中
@@ -106,8 +119,8 @@ class OpenAIModel(Model):
                         "type": call.type,
                         "function": {
                             "name": call.function.name,
-                            "arguments": call.function.arguments
-                        }
+                            "arguments": call.function.arguments,
+                        },
                     }
                     tool_calls.append(tool_call)
 
@@ -122,7 +135,7 @@ class OpenAIModel(Model):
                 content=content,
                 tool_calls=tool_calls,
                 usage=usage,
-                finish_reason=response.choices[0].finish_reason or "stop"
+                finish_reason=response.choices[0].finish_reason or "stop",
             )
 
         except Exception as e:
@@ -131,7 +144,7 @@ class OpenAIModel(Model):
                 content=f"模型调用出错: {e!s}",
                 tool_calls=[],
                 usage=Usage(),
-                finish_reason="error"
+                finish_reason="error",
             )
 
 

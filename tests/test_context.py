@@ -1,6 +1,5 @@
 """Context 模块测试"""
 
-
 from liteagent import Context
 from liteagent.context import Usage
 
@@ -56,9 +55,7 @@ class TestContext:
     def test_add_tool_call(self, sample_context: Context) -> None:
         """测试添加工具调用"""
         sample_context.add_tool_call(
-            "test_tool",
-            {"arg1": "value1"},
-            "tool_result"
+            "test_tool", {"arg1": "value1"}, "tool_result"
         )
 
         assert len(sample_context.messages) == 2
@@ -68,7 +65,9 @@ class TestContext:
         assert assistant_msg["role"] == "assistant"
         assert assistant_msg["content"] is None
         assert len(assistant_msg["tool_calls"]) == 1
-        assert assistant_msg["tool_calls"][0]["function"]["name"] == "test_tool"
+        assert (
+            assistant_msg["tool_calls"][0]["function"]["name"] == "test_tool"
+        )
 
         # 检查工具结果消息
         tool_msg = sample_context.messages[1]

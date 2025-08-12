@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""测试阿里云Qwen API配置
-
-"""
+"""测试阿里云Qwen API配置"""
 
 import os
 

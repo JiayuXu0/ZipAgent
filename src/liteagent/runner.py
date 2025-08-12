@@ -63,10 +63,11 @@ class Runner:
             # 添加用户消息
             context.add_message("user", user_input)
 
+            # 显示问题
+            print(f"\n📝 问题：{user_input}")
+
             # 主执行循环
             for turn in range(max_turns):
-                print(f"[DEBUG] 第 {turn + 1} 轮执行...")
-
                 # 获取当前消息列表
                 messages = context.get_messages_for_api()
 
@@ -81,6 +82,20 @@ class Runner:
 
                 # 累计使用量统计
                 context.usage.add(response.usage)
+
+                # 如果有思考内容（content），先处理
+                if response.content:
+                    # 只有当同时有工具调用时，才将content显示为思考过程
+                    if response.tool_calls:
+                        # 显示思考内容
+                        print(f"\n💭 思考：{response.content.strip()}")
+                        # 将思考内容添加到上下文
+                        context.add_message("assistant", response.content)
+                    else:
+                        # 没有工具调用，这就是最终结果
+                        context.add_message("assistant", response.content)
+                        print(f"\n✅ 回答：{response.content.strip()}")
+                        return RunResult(response.content, context)
 
                 # 如果有工具调用，执行工具
                 if response.tool_calls:
@@ -106,12 +121,11 @@ class Runner:
                         # 查找并执行工具
                         tool = agent.find_tool(tool_name)
                         if tool:
-                            print(
-                                f"[DEBUG] 执行工具: {tool_name}({arguments})"
-                            )
+                            print(f"\n🔧 工具：{tool_name}({arguments})")
                             tool_result = tool.execute(arguments)
 
                             if tool_result.success:
+                                print(f"📊 工具结果：{tool_result.result}")
                                 # 将工具调用和结果添加到上下文
                                 context.add_tool_call(
                                     tool_name, arguments, tool_result.result
@@ -120,20 +134,17 @@ class Runner:
                             else:
                                 # 工具执行失败
                                 error_msg = f"工具 {tool_name} 执行失败: {tool_result.error}"
+                                print(f"❌ 工具错误：{error_msg}")
                                 context.add_message("system", error_msg)
                         else:
                             # 找不到工具
                             error_msg = f"找不到工具: {tool_name}"
+                            print(f"❌ 错误：{error_msg}")
                             context.add_message("system", error_msg)
 
                     # 如果有工具结果，继续下一轮
                     if has_tool_results:
                         continue
-
-                # 如果有文本回复，这就是最终结果
-                if response.content:
-                    context.add_message("assistant", response.content)
-                    return RunResult(response.content, context)
 
                 # 如果既没有工具调用，也没有文本回复，说明出现了问题
                 if not response.tool_calls:
