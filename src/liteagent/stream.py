@@ -62,7 +62,7 @@ class StreamEvent:
         )
 
     @classmethod
-    def tool_result(cls, tool_name: str, result: str) -> "StreamEvent":
+    def create_tool_result(cls, tool_name: str, result: str) -> "StreamEvent":
         """创建工具结果事件"""
         return cls(
             type=StreamEventType.TOOL_RESULT,
@@ -81,7 +81,7 @@ class StreamEvent:
         return cls(type=StreamEventType.ANSWER_DELTA, content=content)
 
     @classmethod
-    def error(cls, error: str) -> "StreamEvent":
+    def create_error(cls, error: str) -> "StreamEvent":
         """创建错误事件"""
         return cls(type=StreamEventType.ERROR, error=error)
 

@@ -3,7 +3,7 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any, Dict, Generator, List, Optional, Union
 
 from .context import Usage
 
@@ -51,14 +51,15 @@ class Model(ABC):
         self,
         messages: List[Dict[str, Any]],
         tools: Optional[List[Dict[str, Any]]] = None,
-    ) -> Generator[StreamDelta, None, ModelResponse]:
+    ) -> Generator[Union[StreamDelta, ModelResponse], None, None]:
         """生成流式响应（可选实现）"""
         # 默认实现：调用普通生成，然后逐字符yield
         response = self.generate(messages, tools)
         if response.content:
             for char in response.content:
                 yield StreamDelta(content=char)
-        return response
+        # 最后yield完整的响应
+        yield response
 
 
 class OpenAIModel(Model):
@@ -100,6 +101,8 @@ class OpenAIModel(Model):
 
             # 其他参数
             self.kwargs = kwargs.copy()
+            self.temperature = kwargs.get('temperature', 0.7)
+            self.max_tokens = kwargs.get('max_tokens', None)
 
         except ImportError as e:
             raise ImportError("需要安装openai包: pip install openai") from e
@@ -173,7 +176,7 @@ class OpenAIModel(Model):
         self,
         messages: List[Dict[str, Any]],
         tools: Optional[List[Dict[str, Any]]] = None,
-    ) -> Generator[StreamDelta, None, ModelResponse]:
+    ) -> Generator[Union[StreamDelta, ModelResponse], None, None]:
         """调用OpenAI流式生成响应"""
         try:
             # 准备API调用参数
@@ -225,7 +228,8 @@ class OpenAIModel(Model):
                 usage.output_tokens = chunk.usage.completion_tokens or 0
                 usage.total_tokens = chunk.usage.total_tokens or 0
 
-            return ModelResponse(
+            # 最后yield完整的响应
+            yield ModelResponse(
                 content=full_content,
                 tool_calls=tool_calls,
                 usage=usage,
@@ -236,7 +240,7 @@ class OpenAIModel(Model):
             # 错误处理 - 返回错误增量
             error_msg = f"模型流式调用出错: {e!s}"
             yield StreamDelta(content=error_msg)
-            return ModelResponse(
+            yield ModelResponse(
                 content=error_msg,
                 tool_calls=[],
                 usage=Usage(),

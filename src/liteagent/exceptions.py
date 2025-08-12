@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 
 class LiteAgentError(Exception):
     """LiteAgent 基础异常类"""
-    
+
     def __init__(
         self,
         message: str,
@@ -19,7 +19,7 @@ class LiteAgentError(Exception):
         self.message = message
         self.details = details or {}
         self.original_error = original_error
-    
+
     def __str__(self) -> str:
         if self.original_error:
             return f"{self.message} (原因: {self.original_error})"
@@ -28,7 +28,7 @@ class LiteAgentError(Exception):
 
 class ModelError(LiteAgentError):
     """模型调用相关错误"""
-    
+
     def __init__(
         self,
         message: str,
@@ -42,7 +42,7 @@ class ModelError(LiteAgentError):
 
 class ToolError(LiteAgentError):
     """工具执行相关错误"""
-    
+
     def __init__(
         self,
         message: str,
@@ -56,7 +56,7 @@ class ToolError(LiteAgentError):
 
 class ToolNotFoundError(ToolError):
     """找不到指定的工具"""
-    
+
     def __init__(self, tool_name: str):
         super().__init__(
             f"找不到工具: {tool_name}",
@@ -66,7 +66,7 @@ class ToolNotFoundError(ToolError):
 
 class ToolExecutionError(ToolError):
     """工具执行失败"""
-    
+
     def __init__(
         self,
         tool_name: str,
@@ -88,7 +88,7 @@ class ContextError(LiteAgentError):
 
 class TokenLimitError(ContextError):
     """Token 限制错误"""
-    
+
     def __init__(
         self,
         current_tokens: int,
@@ -102,7 +102,7 @@ class TokenLimitError(ContextError):
 
 class MaxTurnsError(LiteAgentError):
     """达到最大执行轮次"""
-    
+
     def __init__(self, max_turns: int):
         super().__init__(
             f"达到最大执行轮次 ({max_turns})，可能存在无限循环",
@@ -112,7 +112,7 @@ class MaxTurnsError(LiteAgentError):
 
 class ResponseParseError(LiteAgentError):
     """响应解析错误"""
-    
+
     def __init__(
         self,
         message: str,
@@ -125,7 +125,7 @@ class ResponseParseError(LiteAgentError):
 
 class ConfigurationError(LiteAgentError):
     """配置错误"""
-    
+
     def __init__(self, message: str, config_key: Optional[str] = None):
         details = {"config_key": config_key} if config_key else {}
         super().__init__(message, details)
@@ -145,11 +145,13 @@ def create_error_with_context(
     **kwargs
 ) -> LiteAgentError:
     """创建带有执行上下文的异常"""
-    details = kwargs.get("details", {})
-    if agent_name:
-        details["agent_name"] = agent_name
-    if user_input:
-        details["user_input"] = user_input[:100]  # 限制长度
+    # 创建错误实例
+    error = error_class(message, **kwargs)
     
-    kwargs["details"] = details
-    return error_class(message, **kwargs)
+    # 添加上下文信息到 details
+    if agent_name:
+        error.details["agent_name"] = agent_name
+    if user_input:
+        error.details["user_input"] = user_input[:100]  # 限制长度
+    
+    return error

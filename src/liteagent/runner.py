@@ -154,7 +154,7 @@ class Runner:
 
                             if tool_result.success:
                                 # 发送工具结果事件
-                                tool_result_event = StreamEvent.tool_result(
+                                tool_result_event = StreamEvent.create_tool_result(
                                     tool_name, tool_result.result
                                 )
                                 if stream_callback:
@@ -169,7 +169,7 @@ class Runner:
                             else:
                                 # 工具执行失败
                                 error_msg = f"工具 {tool_name} 执行失败: {tool_result.error}"
-                                error_event = StreamEvent.error(error_msg)
+                                error_event = StreamEvent.create_error(error_msg)
                                 if stream_callback:
                                     stream_callback(error_event)
                                 else:
@@ -178,7 +178,7 @@ class Runner:
                         else:
                             # 找不到工具
                             error_msg = f"找不到工具: {tool_name}"
-                            error_event = StreamEvent.error(error_msg)
+                            error_event = StreamEvent.create_error(error_msg)
                             if stream_callback:
                                 stream_callback(error_event)
                             else:
@@ -351,7 +351,7 @@ class Runner:
 
                             if tool_result.success:
                                 # 发送工具结果事件
-                                yield StreamEvent.tool_result(
+                                yield StreamEvent.create_tool_result(
                                     tool_name, tool_result.result
                                 )
                                 # 将工具调用和结果添加到上下文
@@ -362,12 +362,12 @@ class Runner:
                             else:
                                 # 工具执行失败
                                 error_msg = f"工具 {tool_name} 执行失败: {tool_result.error}"
-                                yield StreamEvent.error(error_msg)
+                                yield StreamEvent.create_error(error_msg)
                                 context.add_message("system", error_msg)
                         else:
                             # 找不到工具
                             error_msg = f"找不到工具: {tool_name}"
-                            yield StreamEvent.error(error_msg)
+                            yield StreamEvent.create_error(error_msg)
                             context.add_message("system", error_msg)
 
                     # 如果有工具结果，继续下一轮
@@ -377,17 +377,17 @@ class Runner:
                 # 如果既没有工具调用，也没有文本回复，说明出现了问题
                 if not response.tool_calls:
                     error_msg = "模型没有返回任何内容"
-                    yield StreamEvent.error(error_msg)
+                    yield StreamEvent.create_error(error_msg)
                     return RunResult(
                         "", context, success=False, error=error_msg
                     )
 
             # 超过最大轮次
             error_msg = f"达到最大执行轮次 ({max_turns})，可能存在无限循环"
-            yield StreamEvent.error(error_msg)
+            yield StreamEvent.create_error(error_msg)
             return RunResult("", context, success=False, error=error_msg)
 
         except Exception as e:
             error_msg = f"运行过程中出现错误: {e!s}"
-            yield StreamEvent.error(error_msg)
+            yield StreamEvent.create_error(error_msg)
             return RunResult("", context, success=False, error=error_msg)

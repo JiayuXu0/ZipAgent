@@ -30,6 +30,8 @@ class TestAgent:
         self, sample_agent: Agent
     ) -> None:
         """测试获取系统消息（无工具）"""
+        # 禁用系统提示进行测试
+        sample_agent.use_system_prompt = False
         message = sample_agent.get_system_message()
 
         assert message["role"] == "system"
