@@ -10,7 +10,6 @@ from liteagent import (
     MaxTurnsError,
     ModelError,
     Runner,
-    ToolError,
     ToolExecutionError,
     ToolNotFoundError,
     function_tool,
@@ -30,7 +29,7 @@ def divide(a: float, b: float) -> float:
 def unstable_api() -> str:
     """模拟不稳定的API调用"""
     import random
-    
+
     if random.random() < 0.5:
         raise ConnectionError("API 连接失败")
     return "API 调用成功"
@@ -41,13 +40,13 @@ def demo_tool_error():
     print("=" * 60)
     print("🔧 工具错误处理演示")
     print("=" * 60)
-    
+
     agent = Agent(
         name="Calculator",
         instructions="你是一个计算助手",
         tools=[divide]
     )
-    
+
     # 测试除零错误
     try:
         result = Runner.run(agent, "计算 10 除以 0")
@@ -66,18 +65,18 @@ def demo_max_turns_error():
     print("\n" + "=" * 60)
     print("🔄 最大轮次错误演示")
     print("=" * 60)
-    
+
     @function_tool
     def recursive_tool() -> str:
         """一个会导致无限循环的工具"""
         return "请再次调用这个工具"
-    
+
     agent = Agent(
         name="RecursiveAgent",
         instructions="总是调用可用的工具",
         tools=[recursive_tool]
     )
-    
+
     try:
         result = Runner.run(agent, "开始", max_turns=3)
     except MaxTurnsError as e:
@@ -90,13 +89,13 @@ def demo_tool_not_found():
     print("\n" + "=" * 60)
     print("🔍 工具未找到错误演示")
     print("=" * 60)
-    
+
     agent = Agent(
         name="LimitedAgent",
         instructions="你可以调用 search_web 工具搜索信息",
         tools=[]  # 没有提供任何工具
     )
-    
+
     try:
         # Agent可能会尝试调用不存在的工具
         result = Runner.run(agent, "搜索最新的AI新闻")
@@ -111,9 +110,9 @@ def demo_model_error():
     print("\n" + "=" * 60)
     print("🤖 模型错误处理演示")
     print("=" * 60)
-    
+
     from liteagent import OpenAIModel
-    
+
     # 使用无效的API key
     try:
         model = OpenAIModel(
@@ -121,13 +120,13 @@ def demo_model_error():
             api_key="invalid_key",
             base_url="https://api.openai.com/v1"
         )
-        
+
         agent = Agent(
             name="TestAgent",
             instructions="你是一个测试助手",
             model=model
         )
-        
+
         result = Runner.run(agent, "Hello")
     except ModelError as e:
         print(f"❌ 模型错误: {e}")
@@ -142,15 +141,15 @@ def demo_graceful_error_handling():
     print("\n" + "=" * 60)
     print("✨ 优雅错误处理演示")
     print("=" * 60)
-    
+
     agent = Agent(
         name="RobustAgent",
         instructions="尽力帮助用户，如果工具失败就用文字说明",
         tools=[unstable_api]
     )
-    
+
     max_retries = 3
-    
+
     for attempt in range(max_retries):
         try:
             print(f"\n尝试 {attempt + 1}/{max_retries}...")
@@ -180,13 +179,13 @@ def demo_custom_error_handler():
     print("\n" + "=" * 60)
     print("🎯 自定义错误处理器演示")
     print("=" * 60)
-    
+
     class ErrorHandler:
         """错误处理器，可以记录、报警、重试等"""
-        
+
         def __init__(self):
             self.error_log = []
-        
+
         def handle(self, error: LiteAgentError):
             """处理错误"""
             # 记录错误
@@ -195,7 +194,7 @@ def demo_custom_error_handler():
                 "message": str(error),
                 "details": error.details
             })
-            
+
             # 根据错误类型采取不同策略
             if isinstance(error, ToolExecutionError):
                 print(f"🔧 记录工具错误: {error.details['tool_name']}")
@@ -206,13 +205,13 @@ def demo_custom_error_handler():
                 print(f"🤖 记录模型错误: {error.message}")
             else:
                 print(f"❓ 记录未知错误: {error}")
-        
+
         def get_statistics(self):
             """获取错误统计"""
             from collections import Counter
             error_types = Counter(e["type"] for e in self.error_log)
             return dict(error_types)
-    
+
     # 使用错误处理器
     handler = ErrorHandler()
     agent = Agent(
@@ -220,14 +219,14 @@ def demo_custom_error_handler():
         instructions="测试各种错误",
         tools=[divide, unstable_api]
     )
-    
+
     # 测试多个场景
     test_cases = [
         "计算 10 除以 0",
         "调用API",
         "计算 100 除以 5",
     ]
-    
+
     for test in test_cases:
         try:
             print(f"\n测试: {test}")
@@ -235,7 +234,7 @@ def demo_custom_error_handler():
             print(f"✅ 成功: {result.content}")
         except LiteAgentError as e:
             handler.handle(e)
-    
+
     # 显示错误统计
     stats = handler.get_statistics()
     if stats:
@@ -246,7 +245,7 @@ def main():
     """主演示程序"""
     print("🚀 LiteAgent 异常处理系统演示")
     print("\n本演示展示如何使用结构化异常进行错误处理")
-    
+
     try:
         # 演示各种错误场景
         demo_tool_error()
@@ -255,12 +254,12 @@ def main():
         # demo_model_error()  # 这个需要真实的API调用
         demo_graceful_error_handling()
         demo_custom_error_handler()
-        
+
     except KeyboardInterrupt:
         print("\n\n⏹️ 演示被用户中断")
     except Exception as e:
         print(f"\n❌ 未预期的错误: {e}")
-    
+
     print("\n" + "=" * 60)
     print("📝 总结：")
     print("1. 结构化异常提供了丰富的错误上下文")

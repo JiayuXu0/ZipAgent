@@ -1,5 +1,6 @@
 """测试 Model 模块"""
 
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -125,10 +126,15 @@ class TestOpenAIModel:
     """测试 OpenAIModel 类"""
 
     @patch('openai.OpenAI')
+    @patch.dict('os.environ', {}, clear=False)  # 不清除所有环境变量
     def test_openai_model_initialization(self, mock_openai):
         """测试 OpenAIModel 初始化"""
+        # 确保测试环境变量不影响结果
+        for key in ['MODEL', 'API_KEY', 'BASE_URL', 'TEMPERATURE', 'MAX_TOKENS']:
+            os.environ.pop(key, None)
+            
         model = OpenAIModel(
-            model="gpt-3.5-turbo",
+            model_name="gpt-3.5-turbo",
             api_key="test_key",
             base_url="https://api.openai.com/v1"
         )
@@ -143,15 +149,15 @@ class TestOpenAIModel:
         """测试从环境变量初始化"""
         with patch.dict('os.environ', {
             'MODEL': 'gpt-4',
-            'API_KEY': 'env_key',
+            'API_KEY': 'env_key', 
             'BASE_URL': 'https://custom.api.com/v1',
-            'TEMPERATURE': '0.5',
+            'TEMPERATURE': '0.7',
             'MAX_TOKENS': '1000'
         }):
             model = OpenAIModel()
 
             assert model.model_name == "gpt-4"
-            assert model.temperature == 0.5
+            assert model.temperature == 0.7
             assert model.max_tokens == 1000
 
     @patch('openai.OpenAI')
@@ -176,7 +182,7 @@ class TestOpenAIModel:
         mock_client.chat.completions.create.return_value = mock_response
 
         # 测试
-        model = OpenAIModel(model="gpt-3.5-turbo", api_key="test")
+        model = OpenAIModel(model_name="gpt-3.5-turbo", api_key="test")
         messages = [{"role": "user", "content": "测试"}]
 
         response = model.generate(messages)
@@ -217,7 +223,7 @@ class TestOpenAIModel:
         mock_client.chat.completions.create.return_value = mock_response
 
         # 测试
-        model = OpenAIModel(model="gpt-3.5-turbo", api_key="test")
+        model = OpenAIModel(model_name="gpt-3.5-turbo", api_key="test")
         messages = [{"role": "user", "content": "测试"}]
         tools = [{"type": "function", "function": {"name": "test_tool"}}]
 
@@ -272,7 +278,7 @@ class TestOpenAIModel:
         mock_client.chat.completions.create.return_value = iter(mock_chunks)
 
         # 测试
-        model = OpenAIModel(model="gpt-3.5-turbo", api_key="test")
+        model = OpenAIModel(model_name="gpt-3.5-turbo", api_key="test")
         messages = [{"role": "user", "content": "测试"}]
 
         deltas = list(model.generate_stream(messages))
@@ -301,7 +307,7 @@ class TestOpenAIModel:
         # 模拟 API 错误
         mock_client.chat.completions.create.side_effect = Exception("API Error")
 
-        model = OpenAIModel(model="gpt-3.5-turbo", api_key="test")
+        model = OpenAIModel(model_name="gpt-3.5-turbo", api_key="test")
         messages = [{"role": "user", "content": "测试"}]
 
         with pytest.raises(Exception) as exc_info:

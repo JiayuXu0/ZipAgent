@@ -21,7 +21,7 @@ class ModelResponse:
     """模型响应结果"""
 
     content: Optional[str]
-    tool_calls: List[Dict[str, Any]]
+    tool_calls: Optional[List[Dict[str, Any]]]
     usage: Usage
     finish_reason: str
 
@@ -101,8 +101,12 @@ class OpenAIModel(Model):
 
             # 其他参数
             self.kwargs = kwargs.copy()
-            self.temperature = kwargs.get('temperature', 0.7)
-            self.max_tokens = kwargs.get('max_tokens', None)
+            # 从环境变量或参数获取 temperature 和 max_tokens
+            env_temp = os.getenv('TEMPERATURE')
+            self.temperature = float(env_temp) if env_temp else kwargs.get('temperature', 0.7)
+            
+            env_max_tokens = os.getenv('MAX_TOKENS')
+            self.max_tokens = int(env_max_tokens) if env_max_tokens else kwargs.get('max_tokens', None)
 
         except ImportError as e:
             raise ImportError("需要安装openai包: pip install openai") from e
@@ -113,64 +117,58 @@ class OpenAIModel(Model):
         tools: Optional[List[Dict[str, Any]]] = None,
     ) -> ModelResponse:
         """调用OpenAI生成响应"""
-        try:
-            # 准备API调用参数
-            call_kwargs = {
-                "model": self.model_name,
-                "messages": messages,
-                "temperature": 0.7,
-                "max_tokens": 1000,
-                **self.kwargs,
-            }
+        # 准备API调用参数
+        call_kwargs = {
+            "model": self.model_name,
+            "messages": messages,
+            "temperature": self.temperature,
+            **self.kwargs,
+        }
+        
+        # 只有当 max_tokens 有值时才添加
+        if self.max_tokens is not None:
+            call_kwargs["max_tokens"] = self.max_tokens
 
-            # 如果有工具，添加到请求中
-            if tools:
-                call_kwargs["tools"] = tools
-                call_kwargs["tool_choice"] = "auto"
+        # 如果有工具，添加到请求中
+        if tools:
+            call_kwargs["tools"] = tools
+            call_kwargs["tool_choice"] = "auto"
 
-            # 调用OpenAI API
-            response = self.client.chat.completions.create(**call_kwargs)
+        # 调用OpenAI API
+        response = self.client.chat.completions.create(**call_kwargs)
 
-            # 解析响应
-            message = response.choices[0].message
-            content = message.content
-            tool_calls: List[Dict[str, Any]] = []
+        # 解析响应
+        message = response.choices[0].message
+        content = message.content
+        tool_calls: Optional[List[Dict[str, Any]]] = None
 
-            # 处理工具调用
-            if message.tool_calls:
-                for call in message.tool_calls:
-                    tool_call = {
-                        "id": call.id,
-                        "type": call.type,
-                        "function": {
-                            "name": call.function.name,
-                            "arguments": call.function.arguments,
-                        },
-                    }
-                    tool_calls.append(tool_call)
+        # 处理工具调用
+        if message.tool_calls:
+            tool_calls = []
+            for call in message.tool_calls:
+                tool_call = {
+                    "id": call.id,
+                    "type": call.type,
+                    "function": {
+                        "name": call.function.name,
+                        "arguments": call.function.arguments,
+                    },
+                }
+                tool_calls.append(tool_call)
 
-            # 解析使用量
-            usage = Usage()
-            if response.usage:
-                usage.input_tokens = response.usage.prompt_tokens or 0
-                usage.output_tokens = response.usage.completion_tokens or 0
-                usage.total_tokens = response.usage.total_tokens or 0
+        # 解析使用量
+        usage = Usage()
+        if response.usage:
+            usage.input_tokens = response.usage.prompt_tokens or 0
+            usage.output_tokens = response.usage.completion_tokens or 0
+            usage.total_tokens = response.usage.total_tokens or 0
 
-            return ModelResponse(
-                content=content,
-                tool_calls=tool_calls,
-                usage=usage,
-                finish_reason=response.choices[0].finish_reason or "stop",
-            )
-
-        except Exception as e:
-            # 简单的错误处理
-            return ModelResponse(
-                content=f"模型调用出错: {e!s}",
-                tool_calls=[],
-                usage=Usage(),
-                finish_reason="error",
-            )
+        return ModelResponse(
+            content=content,
+            tool_calls=tool_calls,
+            usage=usage,
+            finish_reason=response.choices[0].finish_reason or "stop",
+        )
 
     def generate_stream(
         self,
