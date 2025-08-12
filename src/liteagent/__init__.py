@@ -2,7 +2,7 @@
 
 from .agent import Agent
 from .context import Context
-from .model import LiteLLMModel, Model, OpenAIModel
+from .model import LiteLLMModel, Model, ModelResponse, OpenAIModel, StreamDelta
 from .runner import Runner, RunResult
 from .stream import StreamEvent, StreamEventType
 from .tool import Tool, function_tool
@@ -14,9 +14,11 @@ __all__ = [
     "Context",
     "LiteLLMModel",
     "Model",
+    "ModelResponse",
     "OpenAIModel",
     "RunResult",
     "Runner",
+    "StreamDelta",
     "StreamEvent",
     "StreamEventType",
     "Tool",

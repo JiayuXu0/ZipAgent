@@ -3,7 +3,7 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Generator, List, Optional
 
 from .context import Usage
 
@@ -26,6 +26,15 @@ class ModelResponse:
     finish_reason: str
 
 
+@dataclass
+class StreamDelta:
+    """流式响应增量"""
+
+    content: Optional[str] = None
+    tool_calls: Optional[List[Dict[str, Any]]] = None
+    finish_reason: Optional[str] = None
+
+
 class Model(ABC):
     """LLM模型抽象基类"""
 
@@ -37,6 +46,19 @@ class Model(ABC):
     ) -> ModelResponse:
         """生成模型响应"""
         pass
+
+    def generate_stream(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+    ) -> Generator[StreamDelta, None, ModelResponse]:
+        """生成流式响应（可选实现）"""
+        # 默认实现：调用普通生成，然后逐字符yield
+        response = self.generate(messages, tools)
+        if response.content:
+            for char in response.content:
+                yield StreamDelta(content=char)
+        return response
 
 
 class OpenAIModel(Model):
@@ -142,6 +164,80 @@ class OpenAIModel(Model):
             # 简单的错误处理
             return ModelResponse(
                 content=f"模型调用出错: {e!s}",
+                tool_calls=[],
+                usage=Usage(),
+                finish_reason="error",
+            )
+
+    def generate_stream(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None,
+    ) -> Generator[StreamDelta, None, ModelResponse]:
+        """调用OpenAI流式生成响应"""
+        try:
+            # 准备API调用参数
+            call_kwargs = {
+                "model": self.model_name,
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 1000,
+                "stream": True,  # 启用流式
+                **self.kwargs,
+            }
+
+            # 如果有工具，添加到请求中
+            if tools:
+                call_kwargs["tools"] = tools
+                call_kwargs["tool_choice"] = "auto"
+
+            # 调用OpenAI流式API
+            stream = self.client.chat.completions.create(**call_kwargs)
+
+            # 收集完整响应用于最终返回
+            full_content = ""
+            tool_calls: List[Dict[str, Any]] = []
+            finish_reason = "stop"
+            usage = Usage()
+
+            # 处理流式响应
+            for chunk in stream:
+                if chunk.choices:
+                    delta = chunk.choices[0].delta
+
+                    # 处理内容增量
+                    if delta.content:
+                        full_content += delta.content
+                        yield StreamDelta(content=delta.content)
+
+                    # 处理工具调用（通常一次性返回）
+                    if delta.tool_calls:
+                        # TODO: 处理工具调用流式
+                        pass
+
+                    # 处理结束原因
+                    if chunk.choices[0].finish_reason:
+                        finish_reason = chunk.choices[0].finish_reason
+
+            # 解析使用量（在流式响应的最后一个chunk中）
+            if hasattr(chunk, "usage") and chunk.usage:
+                usage.input_tokens = chunk.usage.prompt_tokens or 0
+                usage.output_tokens = chunk.usage.completion_tokens or 0
+                usage.total_tokens = chunk.usage.total_tokens or 0
+
+            return ModelResponse(
+                content=full_content,
+                tool_calls=tool_calls,
+                usage=usage,
+                finish_reason=finish_reason,
+            )
+
+        except Exception as e:
+            # 错误处理 - 返回错误增量
+            error_msg = f"模型流式调用出错: {e!s}"
+            yield StreamDelta(content=error_msg)
+            return ModelResponse(
+                content=error_msg,
                 tool_calls=[],
                 usage=Usage(),
                 finish_reason="error",
