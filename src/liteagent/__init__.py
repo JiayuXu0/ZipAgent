@@ -20,6 +20,16 @@ from .runner import Runner, RunResult
 from .stream import StreamEvent, StreamEventType
 from .tool import Tool, function_tool
 
+# MCP 工具相关导入（可选）
+try:
+    from .mcp_tool import MCPToolGroup, MCPToolPool, load_mcp_tools
+    _MCP_AVAILABLE = True
+except ImportError:
+    _MCP_AVAILABLE = False
+    MCPToolGroup = None
+    MCPToolPool = None
+    load_mcp_tools = None
+
 __version__ = "0.1.0"
 
 __all__ = [
@@ -41,6 +51,12 @@ __all__ = [
     "StreamEventType",
     # 工具装饰器
     "function_tool",
+    # MCP 工具（可选）
+    *([
+        "MCPToolGroup",
+        "MCPToolPool",
+        "load_mcp_tools"
+    ] if _MCP_AVAILABLE else []),
     # 异常类
     "LiteAgentError",
     "ModelError",

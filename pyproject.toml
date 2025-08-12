@@ -30,8 +30,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
+    "mcp>=1.12.4",
+    "nest-asyncio>=1.6.0",
     "openai>=1.0.0",
     "pydantic>=2.0.0",
 ]
