@@ -2,7 +2,6 @@
 
 import os
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from .model import Model, OpenAIModel
@@ -64,7 +63,7 @@ class Agent:
         """加载系统提示文件"""
         if not self.system_prompt_file:
             return None
-            
+
         try:
             # 如果是绝对路径，直接使用
             if os.path.isabs(self.system_prompt_file):
@@ -72,24 +71,28 @@ class Agent:
             else:
                 # 相对路径：先尝试 liteagent 包目录，再尝试当前工作目录
                 package_dir = os.path.dirname(__file__)
-                package_file_path = os.path.join(package_dir, self.system_prompt_file)
-                
+                package_file_path = os.path.join(
+                    package_dir, self.system_prompt_file
+                )
+
                 if os.path.exists(package_file_path):
                     file_path = package_file_path
                 else:
                     # 回退到当前工作目录
-                    file_path = os.path.join(os.getcwd(), self.system_prompt_file)
-            
+                    file_path = os.path.join(
+                        os.getcwd(), self.system_prompt_file
+                    )
+
             # 检查文件是否存在
             if not os.path.exists(file_path):
                 return None
-                
+
             # 读取文件内容
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read().strip()
-                
+
             return content if content else None
-            
+
         except Exception:
             # 读取失败时静默忽略
             return None
@@ -127,7 +130,9 @@ class Agent:
         """获取所有工具的扁平化列表"""
         all_tools = []
         for item in self.tools:
-            if hasattr(item, '__iter__') and not isinstance(item, (str, bytes)):
+            if hasattr(item, "__iter__") and not isinstance(
+                item, (str, bytes)
+            ):
                 # 这是一个工具组（MCPToolGroup）
                 all_tools.extend(item)
             else:
@@ -138,7 +143,9 @@ class Agent:
     def _remove_tool_from_original_list(self, target_tool: Tool) -> None:
         """从原始工具列表中移除指定工具"""
         for i, item in enumerate(self.tools):
-            if hasattr(item, '__iter__') and not isinstance(item, (str, bytes)):
+            if hasattr(item, "__iter__") and not isinstance(
+                item, (str, bytes)
+            ):
                 # 这是一个工具组
                 if target_tool in item.tools:
                     item.tools.remove(target_tool)

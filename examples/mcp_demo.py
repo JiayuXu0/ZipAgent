@@ -118,7 +118,10 @@ async def demo_3_real_mcp_usage():
     print("=" * 60)
 
     try:
-        from zipagent import MCPTool
+        import time
+
+        from zipagent import MCPTool, Runner
+        from zipagent.stream import StreamEventType
 
         # 检查 API key
         amap_api_key = "aa49489bbe0255ab108e386e6395411a"
@@ -133,7 +136,7 @@ async def demo_3_real_mcp_usage():
             command="npx",
             args=["-y", "@amap/amap-maps-mcp-server"],
             env={"AMAP_MAPS_API_KEY": amap_api_key},
-            tools=["maps_weather", "maps_text_search"],  # 只导入部分工具
+            tools=["maps_geo", "maps_weather"],  # 使用正确的工具名称
             name="amap",
         )
 
@@ -163,22 +166,103 @@ async def demo_3_real_mcp_usage():
         connections = MCPTool.list_connections()
         print(f"\n📊 活动连接: {connections}")
 
-        print("\n💡 可以尝试的问题:")
-        print("- '北京今天天气怎么样？'")
-        print("- '搜索北京大学的位置'")
-        print("- '计算两个坐标点的距离'")
+        print("\n💡 开始演示MCP工具调用...")
+        print("=" * 40)
+
+        # 演示问题列表
+        demo_questions = [
+            "北京故宫的坐标是什么？",
+            "北京今天的天气怎么样？",
+            "计算北京故宫(116.407387,39.904179)到天安门(116.397477,39.909652)的距离",
+        ]
+
+        for i, question in enumerate(demo_questions, 1):
+            print(f"\n🎯 演示 {i}: {question}")
+            print("-" * 50)
+
+            # 流式处理变量
+            current_thinking = ""
+            current_answer = ""
+
+            try:
+                # 使用流式运行
+                for event in Runner.run_stream(agent, question):
+                    if event.type == StreamEventType.QUESTION:
+                        print(f"📝 问题：{event.content}")
+
+                    elif event.type == StreamEventType.THINKING_DELTA:
+                        # 思考过程逐字符显示
+                        if not current_thinking:
+                            print("\n🧠 AI思考：", end="", flush=True)
+                        current_thinking += event.content
+                        print(event.content, end="", flush=True)
+                        time.sleep(0.02)
+
+                    elif event.type == StreamEventType.THINKING:
+                        if current_thinking:
+                            print("\n   💡 思考完成")
+                        current_thinking = ""
+
+                    elif event.type == StreamEventType.TOOL_CALL:
+                        print(
+                            f"\n🔧 调用工具：{event.tool_name}({event.tool_args})"
+                        )
+
+                    elif event.type == StreamEventType.TOOL_RESULT:
+                        print(f"📊 工具结果：{event.tool_result}")
+
+                    elif event.type == StreamEventType.ANSWER_DELTA:
+                        # 最终回答逐字符显示
+                        if not current_answer:
+                            print("\n✅ 最终回答：", end="", flush=True)
+                        current_answer += event.content
+                        print(event.content, end="", flush=True)
+                        time.sleep(0.025)
+
+                    elif event.type == StreamEventType.ANSWER:
+                        print("\n\n🎉 任务完成！")
+                        break
+
+                    elif event.type == StreamEventType.ERROR:
+                        print(f"\n❌ 错误：{event.error}")
+                        break
+
+            except Exception as e:
+                print(f"\n❌ 演示 {i} 执行失败: {e}")
+                continue
+
+            # 重置状态
+            current_thinking = ""
+            current_answer = ""
+
+            if i < len(demo_questions):
+                print("\n" + "=" * 40)
+                time.sleep(1)  # 短暂暂停
+
+        print("\n🎊 所有MCP工具调用演示完成！")
 
     except Exception as e:
         print(f"❌ 演示失败: {e}")
-        print("可能的原因：网络问题、API key无效、或MCP包未找到")
+        print(f"错误类型: {type(e).__name__}")
+        import traceback
+
+        print("详细错误信息:")
+        traceback.print_exc()
+        print("可能的原因：")
+        print("1. MCP SDK未安装: uv add mcp")
+        print("2. nest-asyncio未安装: uv add nest-asyncio")
+        print("3. 网络问题或npm包下载失败")
+        print("4. API key无效或未设置")
+        print("5. 异步环境配置问题")
 
     finally:
         # 清理资源
         print("\n🧹 清理资源...")
         try:
             await MCPTool.disconnect_all()
-        except:
-            pass
+            print("✅ 资源清理完成")
+        except Exception as e:
+            print(f"⚠️ 清理资源时出现警告: {e}")
 
 
 async def demo_4_quick_examples():
