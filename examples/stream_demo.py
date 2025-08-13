@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""LiteAgent 完整流式输出使用演示
+"""
+LiteAgent 流式输出演示
 
 展示所有流式输出功能：
 1. 段落级流式输出
-2. 逐字符流式输出
-3. 回调式流式输出
+2. 逐字符流式输出（打字效果）
+3. 回调式流式处理
 4. 工具调用 + 流式输出
-5. 实际应用场景演示
+5. 交互式聊天应用
+6. 性能对比分析
 """
 
 import time
@@ -241,7 +243,7 @@ def demo_5_interactive_chat():
             print("🤖 助手：", end="", flush=True)
 
             # 使用逐字符流式输出
-            for event in Runner.run_stream_char(agent, user_input):
+            for event in Runner.run_stream(agent, user_input):
                 if event.type == StreamEventType.THINKING_DELTA:
                     # 思考过程用不同颜色显示（如果终端支持）
                     print(

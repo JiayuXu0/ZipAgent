@@ -16,7 +16,7 @@ from liteagent.mcp_tool import (
     MCPServerConfig,
     MCPTool,
     MCPToolGroup,
-    MCPToolPool,
+    _MCPToolPool,  # 现在是内部类
 )
 
 
@@ -89,11 +89,11 @@ class TestMCPToolGroup:
 
 
 class TestMCPToolPool:
-    """测试 MCPToolPool 类"""
+    """测试 _MCPToolPool 类（内部实现）"""
 
     def test_pool_creation(self):
         """测试工具池创建"""
-        pool = MCPToolPool()
+        pool = _MCPToolPool()
         assert len(pool.clients) == 0
         assert len(pool.tool_groups) == 0
 
@@ -101,7 +101,7 @@ class TestMCPToolPool:
     async def test_add_mcp_server_without_mcp(self):
         """测试在没有 MCP SDK 的情况下添加服务器"""
         with patch('liteagent.mcp_tool.MCP_AVAILABLE', False):
-            pool = MCPToolPool()
+            pool = _MCPToolPool()
 
             with pytest.raises(MCPNotAvailableError):
                 await pool.add_mcp_server(
@@ -113,7 +113,7 @@ class TestMCPToolPool:
     @pytest.mark.asyncio
     async def test_remove_server(self):
         """测试移除服务器"""
-        pool = MCPToolPool()
+        pool = _MCPToolPool()
 
         # 添加模拟客户端
         mock_client = AsyncMock(spec=MCPClient)
@@ -133,7 +133,7 @@ class TestMCPToolPool:
     @pytest.mark.asyncio
     async def test_close_all(self):
         """测试关闭所有服务器"""
-        pool = MCPToolPool()
+        pool = _MCPToolPool()
 
         # 添加多个模拟客户端
         for i in range(3):

@@ -30,7 +30,11 @@ import os
 import uuid
 from contextlib import AsyncExitStack
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import TypeVar
+    MCPToolGroupType = TypeVar('MCPToolGroupType', bound='MCPToolGroup')
 
 from .exceptions import ToolError
 from .tool import Tool, ToolResult
@@ -185,6 +189,9 @@ class MCPClient:
 
 class MCPTool(Tool):
     """MCP 工具包装器，将 MCP 工具包装为 LiteAgent 工具"""
+    
+    # 类级别的连接管理
+    _global_pool: Optional['_MCPToolPool'] = None
 
     def __init__(self, name: str, description: str, schema: Dict[str, Any], client: MCPClient):
         # 创建同步包装函数
@@ -197,6 +204,119 @@ class MCPTool(Tool):
 
         # 转换 schema 为 OpenAI 格式
         self.schema = self._convert_mcp_schema(schema)
+    
+    @classmethod
+    async def connect(
+        cls,
+        command: str,
+        args: Optional[List[str]] = None,
+        env: Optional[Dict[str, str]] = None,
+        tools: Optional[List[str]] = None,
+        name: Optional[str] = None
+    ) -> 'MCPToolGroup':
+        """
+        连接到 MCP 服务器并返回工具组
+        
+        Args:
+            command: 启动命令
+            args: 命令参数
+            env: 环境变量
+            tools: 要导入的工具列表，None 表示导入全部
+            name: 服务器名称（可选，自动生成唯一名称）
+        
+        Returns:
+            MCP工具组，可直接放在 Agent.tools 列表中
+        
+        Example:
+            amap_tools = await MCPTool.connect(
+                command="npx",
+                args=["-y", "@amap/amap-maps-mcp-server"],
+                env={"AMAP_MAPS_API_KEY": "your_key"},
+                tools=["maps_weather"]
+            )
+            
+            agent = Agent(tools=[amap_tools])
+        """
+        # 获取或创建全局池
+        if cls._global_pool is None:
+            cls._global_pool = _MCPToolPool()
+        
+        # 生成唯一名称
+        if name is None:
+            name = f"mcp_{uuid.uuid4().hex[:8]}"
+        
+        # 使用内部池添加服务器
+        return await cls._global_pool.add_mcp_server(
+            name=name,
+            command=command,
+            args=args,
+            env=env,
+            tools=tools
+        )
+    
+    @classmethod
+    async def from_npm(
+        cls,
+        package: str,
+        env: Optional[Dict[str, str]] = None,
+        tools: Optional[List[str]] = None,
+        name: Optional[str] = None
+    ) -> 'MCPToolGroup':
+        """
+        从 npm 包快速创建 MCP 工具（便捷方法）
+        
+        Args:
+            package: npm 包名
+            env: 环境变量
+            tools: 要导入的工具列表
+            name: 服务器名称（可选）
+        
+        Returns:
+            MCP工具组
+        
+        Example:
+            weather_tool = await MCPTool.from_npm(
+                "@amap/amap-maps-mcp-server",
+                env={"AMAP_MAPS_API_KEY": "your_key"}
+            )
+        """
+        return await cls.connect(
+            command="npx",
+            args=["-y", package],
+            env=env,
+            tools=tools,
+            name=name
+        )
+    
+    @classmethod
+    async def disconnect(cls, name: str) -> None:
+        """
+        断开特定的 MCP 连接
+        
+        Args:
+            name: 服务器名称
+        """
+        if cls._global_pool:
+            await cls._global_pool.remove_server(name)
+    
+    @classmethod
+    async def disconnect_all(cls) -> None:
+        """断开所有 MCP 连接"""
+        if cls._global_pool:
+            await cls._global_pool.close_all()
+            cls._global_pool = None
+    
+    @classmethod
+    def list_connections(cls) -> List[str]:
+        """
+        列出当前所有活动的 MCP 连接
+        
+        Returns:
+            连接名称列表
+        """
+        if cls._global_pool:
+            return list(cls._global_pool.clients.keys())
+        return []
 
     def _convert_mcp_schema(self, mcp_schema: Dict[str, Any]) -> Dict[str, Any]:
         """将 MCP schema 转换为 OpenAI Function Calling 格式"""
@@ -295,8 +415,8 @@ class MCPToolGroup:
         return self._tools_dict.get(name)
 
 
-class MCPToolPool:
-    """MCP 工具池，管理多个 MCP 服务器和工具"""
+class _MCPToolPool:
+    """MCP 工具池（内部实现），管理多个 MCP 服务器和工具"""
 
     def __init__(self):
         self.clients: Dict[str, MCPClient] = {}
@@ -395,15 +515,17 @@ class MCPToolPool:
             await self.remove_server(name)
 
 
-# 便捷函数
+# 便捷函数 - 保留以支持向后兼容，但标记为已弃用
 async def load_mcp_tools(
     command: str,
     args: Optional[List[str]] = None,
     env: Optional[Dict[str, str]] = None,
     tools: Optional[List[str]] = None
-) -> MCPToolGroup:
+) -> 'MCPToolGroup':
     """
     快速加载 MCP 工具的便捷函数
+    
+    警告: 此函数已弃用，请使用 MCPTool.connect() 代替
     
     Args:
         command: 启动命令
@@ -414,36 +536,15 @@ async def load_mcp_tools(
     Returns:
         MCP工具组
     """
-    pool = MCPToolPool()
-    server_name = f"mcp_server_{uuid.uuid4().hex[:8]}"
-
-    try:
-        tool_group = await pool.add_mcp_server(
-            name=server_name,
-            command=command,
-            args=args,
-            env=env,
-            tools=tools
-        )
-        return tool_group
-    except Exception as e:
-        await pool.close_all()
-        raise e
-
-
-# 全局 MCP 工具池实例，用于管理所有 MCP 服务器
-_global_mcp_pool: Optional[MCPToolPool] = None
-
-def get_global_mcp_pool() -> MCPToolPool:
-    """获取全局 MCP 工具池"""
-    global _global_mcp_pool
-    if _global_mcp_pool is None:
-        _global_mcp_pool = MCPToolPool()
-    return _global_mcp_pool
-
-async def cleanup_global_mcp_pool() -> None:
-    """清理全局 MCP 工具池"""
-    global _global_mcp_pool
-    if _global_mcp_pool is not None:
-        await _global_mcp_pool.close_all()
-        _global_mcp_pool = None
+    import warnings
+    warnings.warn(
+        "load_mcp_tools() is deprecated, use MCPTool.connect() instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return await MCPTool.connect(
+        command=command,
+        args=args,
+        env=env,
+        tools=tools
+    )

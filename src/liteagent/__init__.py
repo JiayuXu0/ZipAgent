@@ -22,13 +22,12 @@ from .tool import Tool, function_tool
 
 # MCP 工具相关导入（可选）
 try:
-    from .mcp_tool import MCPToolGroup, MCPToolPool, load_mcp_tools
+    from .mcp_tool import MCPTool, MCPToolGroup
     _MCP_AVAILABLE = True
 except ImportError:
     _MCP_AVAILABLE = False
+    MCPTool = None
     MCPToolGroup = None
-    MCPToolPool = None
-    load_mcp_tools = None
 
 __version__ = "0.1.0"
 
@@ -53,9 +52,8 @@ __all__ = [
     "function_tool",
     # MCP 工具（可选）
     *([
-        "MCPToolGroup",
-        "MCPToolPool",
-        "load_mcp_tools"
+        "MCPTool",
+        "MCPToolGroup"
     ] if _MCP_AVAILABLE else []),
     # 异常类
     "LiteAgentError",
