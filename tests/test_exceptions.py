@@ -1,7 +1,7 @@
 """测试异常系统"""
 
 
-from liteagent.exceptions import (
+from zipagent.exceptions import (
     ConfigurationError,
     ContextError,
     LiteAgentError,

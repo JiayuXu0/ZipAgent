@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from liteagent import (
+from zipagent import (
     Agent,
     Context,
     ModelResponse,
@@ -11,7 +11,7 @@ from liteagent import (
     StreamEventType,
     function_tool,
 )
-from liteagent.model import Usage
+from zipagent.model import Usage
 
 
 @function_tool

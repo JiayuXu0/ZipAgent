@@ -13,7 +13,7 @@ LiteAgent 流式输出演示
 
 import time
 
-from liteagent import (
+from zipagent import (
     Agent,
     Runner,
     StreamEvent,

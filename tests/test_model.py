@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from liteagent.model import (
+from zipagent.model import (
     Model,
     ModelResponse,
     OpenAIModel,

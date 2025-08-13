@@ -7,8 +7,8 @@ import os
 
 import pytest
 
-from liteagent import Agent, Model, ModelResponse, OpenAIModel, Runner
-from liteagent.context import Usage
+from zipagent import Agent, Model, ModelResponse, OpenAIModel, Runner
+from zipagent.context import Usage
 
 
 class TestModelIntegration:
@@ -111,7 +111,7 @@ class TestModelIntegration:
                     finish_reason="stop"
                 )
 
-        from liteagent import function_tool
+        from zipagent import function_tool
 
         @function_tool
         def test_tool(arg: str) -> str:
@@ -248,7 +248,7 @@ class TestModelRobustness:
                     finish_reason="tool_calls"
                 )
 
-        from liteagent import function_tool
+        from zipagent import function_tool
 
         @function_tool
         def test() -> str:

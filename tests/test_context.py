@@ -3,8 +3,8 @@
 import uuid
 from datetime import datetime
 
-from liteagent import Context
-from liteagent.context import Usage
+from zipagent import Context
+from zipagent.context import Usage
 
 
 class TestUsage:

@@ -8,8 +8,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from liteagent import Agent, function_tool
-from liteagent.mcp_tool import (
+from zipagent import Agent, function_tool
+from zipagent.mcp_tool import (
     MCPClient,
     MCPError,
     MCPNotAvailableError,
@@ -318,7 +318,7 @@ class TestMCPErrors:
 
     def test_mcp_error_inheritance(self):
         """测试 MCP 错误继承关系"""
-        from liteagent.exceptions import ToolError
+        from zipagent.exceptions import ToolError
 
         error = MCPError("test error", tool_name="test_tool")
         assert isinstance(error, ToolError)

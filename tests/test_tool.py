@@ -1,7 +1,7 @@
 """Tool 模块测试"""
 
-from liteagent import Tool, function_tool
-from liteagent.tool import ToolResult
+from zipagent import Tool, function_tool
+from zipagent.tool import ToolResult
 
 
 class TestToolResult:

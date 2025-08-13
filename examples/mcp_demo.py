@@ -11,15 +11,15 @@ LiteAgent MCP 工具演示
 
 import asyncio
 
-from liteagent import Agent, Runner, function_tool
-
+from zipagent import Agent, function_tool
 
 # ========== 工具定义 ==========
+
 
 @function_tool
 def calculate(expression: str) -> str:
     """计算数学表达式
-    
+
     Args:
         expression: 要计算的数学表达式，如 "2+3*4"
     """
@@ -31,34 +31,38 @@ def calculate(expression: str) -> str:
 
 
 @function_tool
-def calculate_distance(lat1: float, lng1: float, lat2: float, lng2: float) -> str:
+def calculate_distance(
+    lat1: float, lng1: float, lat2: float, lng2: float
+) -> str:
     """计算两点间的直线距离（简化版）
-    
+
     Args:
         lat1: 起点纬度
-        lng1: 起点经度  
+        lng1: 起点经度
         lat2: 终点纬度
         lng2: 终点经度
     """
     import math
-    
+
     lat_diff = abs(lat1 - lat2)
     lng_diff = abs(lng1 - lng2)
     distance = math.sqrt(lat_diff**2 + lng_diff**2) * 111  # 大约转换为公里
-    
+
     return f"直线距离约 {distance:.2f} 公里"
 
 
 # ========== 演示函数 ==========
+
 
 async def demo_1_mcp_integration():
     """演示1: MCP 工具集成"""
     print("=" * 60)
     print("🔗 演示1: MCP 工具集成 - 新 API")
     print("=" * 60)
-    
+
     try:
-        from liteagent import MCPTool
+        from zipagent import MCPTool
+
         print("✅ MCP 工具支持已启用")
     except ImportError:
         print("❌ MCP 工具支持未启用，请安装: uv add mcp")
@@ -68,7 +72,7 @@ async def demo_1_mcp_integration():
     print("  amap_tools = await MCPTool.connect(...)")
     print("  weather_tools = await MCPTool.from_npm('@weather/server')")
     print("  agent = Agent(tools=[function_tool, mcp_tools])")
-    
+
     # 演示连接管理
     connections = MCPTool.list_connections()
     print(f"\n📊 当前连接数: {len(connections)}")
@@ -112,10 +116,10 @@ async def demo_3_real_mcp_usage():
     print("\n" + "=" * 60)
     print("🗺️ 演示3: 真实 MCP 工具使用 (高德地图)")
     print("=" * 60)
-    
+
     try:
-        from liteagent import MCPTool
-        
+        from zipagent import MCPTool
+
         # 检查 API key
         amap_api_key = "aa49489bbe0255ab108e386e6395411a"
         if not amap_api_key:
@@ -123,14 +127,14 @@ async def demo_3_real_mcp_usage():
             return
 
         print("🔧 连接高德地图工具...")
-        
+
         # 使用新的静态方法
         amap_tools = await MCPTool.connect(
             command="npx",
             args=["-y", "@amap/amap-maps-mcp-server"],
             env={"AMAP_MAPS_API_KEY": amap_api_key},
             tools=["maps_weather", "maps_text_search"],  # 只导入部分工具
-            name="amap"
+            name="amap",
         )
 
         print("✅ 高德地图工具加载成功!")
@@ -146,10 +150,10 @@ async def demo_3_real_mcp_usage():
 
 请始终提供准确、有用的地理信息。""",
             tools=[calculate_distance, amap_tools],  # 混合使用！
-            use_system_prompt=True  # 使用工具规范
+            use_system_prompt=True,  # 使用工具规范
         )
 
-        print(f"\n🤖 智能地图助手创建成功")
+        print("\n🤖 智能地图助手创建成功")
         total_tools = len(agent.tools) + len(amap_tools)
         print(f"总工具数: {total_tools}")
         tool_names = ["calculate_distance"] + amap_tools.get_tool_names()
@@ -201,21 +205,21 @@ async def demo_4_quick_examples():
 
 async def main():
     """主演示函数"""
-    print("🌟 LiteAgent MCP 工具演示")
+    print("🌟 ZipAgent MCP 工具演示")
     print("展示 MCP 工具集成的完整功能")
-    
+
     try:
         await demo_1_mcp_integration()
         await demo_2_system_prompt_integration()
         await demo_3_real_mcp_usage()
         await demo_4_quick_examples()
-        
+
         print("\n" + "=" * 60)
         print("✅ MCP 演示完成！")
         print("💡 要了解更多功能:")
         print("  - 基础功能: python basic_demo.py")
         print("  - 流式输出: python stream_demo.py")
-        
+
     except KeyboardInterrupt:
         print("\n⏹️ 演示被用户中断")
     except Exception as e:

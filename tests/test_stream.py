@@ -1,7 +1,7 @@
 """测试 Stream 模块"""
 
 
-from liteagent.stream import StreamEvent, StreamEventType
+from zipagent.stream import StreamEvent, StreamEventType
 
 
 class TestStreamEventType:
