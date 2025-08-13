@@ -3,16 +3,16 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "liteagent"
-version = "0.1.0"
+name = "zipagent"
+version = "0.1.1"
 description = "轻量级的 AI Agent 框架"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Jiayu Xu", email = "your.email@example.com"},
+    {name = "Jiayu Xu", email = "420249001@qq.com"},
 ]
 maintainers = [
-    {name = "Jiayu Xu", email = "your.email@example.com"},
+    {name = "Jiayu Xu", email = "420249001@qq.com"},
 ]
 keywords = ["ai", "agent", "llm", "framework", "assistant"]
 classifiers = [
@@ -64,7 +64,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/liteagent"]
+packages = ["src/zipagent"]
 
 [tool.pyright]
 include = ["src", "tests"]
@@ -110,7 +110,7 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.ruff.lint.isort]
-known-first-party = ["liteagent"]
+known-first-party = ["zipagent"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -121,7 +121,7 @@ python_functions = ["test_*"]
 addopts = [
     "-ra",
     "--strict-markers",
-    "--cov=src/liteagent",
+    "--cov=src/zipagent",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]
@@ -132,7 +132,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/liteagent"]
+source = ["src/zipagent"]
 omit = ["*/tests/*", "*/__init__.py"]
 
 [tool.coverage.report]
@@ -151,15 +151,18 @@ exclude_lines = [
 ]
 
 [tool.uv.sources]
-liteagent = { workspace = true }
+zipagent = { workspace = true }
+
 
 [dependency-groups]
 dev = [
-    "liteagent",
+    "build>=1.3.0",
+    "zipagent",
     "mypy>=1.14.1",
     "pyright>=1.1.403",
     "pytest>=8.3.5",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=5.0.0",
     "ruff>=0.12.8",
+    "twine>=6.1.0",
 ]
