@@ -12,9 +12,7 @@ class TestAgent:
     def test_agent_initialization(self, mock_model: Mock) -> None:
         """测试 Agent 初始化"""
         agent = Agent(
-            name="TestAgent",
-            instructions="测试指令",
-            model=mock_model
+            name="TestAgent", instructions="测试指令", model=mock_model
         )
 
         assert agent.name == "TestAgent"
@@ -24,21 +22,24 @@ class TestAgent:
 
     def test_agent_default_model(self) -> None:
         """测试 Agent 使用默认模型"""
-        agent = Agent(
-            name="TestAgent",
-            instructions="测试指令"
-        )
+        agent = Agent(name="TestAgent", instructions="测试指令")
 
         assert isinstance(agent.model, OpenAIModel)
 
-    def test_get_system_message_without_tools(self, sample_agent: Agent) -> None:
+    def test_get_system_message_without_tools(
+        self, sample_agent: Agent
+    ) -> None:
         """测试获取系统消息（无工具）"""
+        # 禁用系统提示进行测试
+        sample_agent.use_system_prompt = False
         message = sample_agent.get_system_message()
 
         assert message["role"] == "system"
         assert message["content"] == "你是一个测试助手"
 
-    def test_get_system_message_with_tools(self, agent_with_tools: Agent) -> None:
+    def test_get_system_message_with_tools(
+        self, agent_with_tools: Agent
+    ) -> None:
         """测试获取系统消息（有工具）"""
         message = agent_with_tools.get_system_message()
 

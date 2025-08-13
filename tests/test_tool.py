@@ -1,6 +1,5 @@
 """Tool 模块测试"""
 
-
 from liteagent import Tool, function_tool
 from liteagent.tool import ToolResult
 
@@ -14,7 +13,7 @@ class TestToolResult:
             name="test_tool",
             arguments={"x": 1},
             result="success",
-            success=True
+            success=True,
         )
 
         assert result.name == "test_tool"
@@ -30,7 +29,7 @@ class TestToolResult:
             arguments={"x": 1},
             result=None,
             success=False,
-            error="错误信息"
+            error="错误信息",
         )
 
         assert result.success is False
@@ -42,6 +41,7 @@ class TestTool:
 
     def test_tool_initialization(self) -> None:
         """测试 Tool 初始化"""
+
         def test_func(x: int, y: str = "default") -> str:
             return f"{x}-{y}"
 
@@ -54,6 +54,7 @@ class TestTool:
 
     def test_tool_schema_generation(self) -> None:
         """测试 Tool schema 生成"""
+
         def test_func(x: int, y: str = "default") -> str:
             return f"{x}-{y}"
 
@@ -74,6 +75,7 @@ class TestTool:
 
     def test_tool_execute_success(self) -> None:
         """测试工具执行成功"""
+
         def test_func(x: int, y: int) -> int:
             return x + y
 
@@ -86,6 +88,7 @@ class TestTool:
 
     def test_tool_execute_failure(self) -> None:
         """测试工具执行失败"""
+
         def test_func(x: int) -> int:
             raise ValueError("测试错误")
 
@@ -98,6 +101,7 @@ class TestTool:
 
     def test_tool_to_dict(self) -> None:
         """测试工具转换为字典"""
+
         def test_func(x: int) -> int:
             return x * 2
 
@@ -112,6 +116,7 @@ class TestFunctionTool:
 
     def test_function_tool_decorator_no_args(self) -> None:
         """测试无参数的装饰器"""
+
         @function_tool
         def test_func(x: int) -> int:
             """测试函数"""
@@ -123,6 +128,7 @@ class TestFunctionTool:
 
     def test_function_tool_decorator_with_args(self) -> None:
         """测试带参数的装饰器"""
+
         @function_tool(name="custom_name", description="自定义描述")
         def test_func(x: int) -> int:
             return x * 2
@@ -133,6 +139,7 @@ class TestFunctionTool:
 
     def test_function_tool_decorator_no_docstring(self) -> None:
         """测试没有文档字符串的函数"""
+
         @function_tool
         def test_func(x: int) -> int:
             return x * 2
@@ -141,6 +148,7 @@ class TestFunctionTool:
 
     def test_function_tool_execution(self) -> None:
         """测试装饰器创建的工具执行"""
+
         @function_tool
         def multiply(x: int, y: int) -> int:
             """乘法运算"""

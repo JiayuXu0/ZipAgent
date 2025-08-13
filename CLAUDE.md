@@ -262,6 +262,35 @@ result = Runner.run(agent, "计算 2+2")
 print(result.content)
 ```
 
+## 系统提示功能
+
+LiteAgent 支持通过 `system.md` 文件自动加载默认系统提示，用于规范 AI 的工具使用行为。
+
+### 默认系统提示
+
+项目根目录下的 `system.md` 文件定义了工具使用规范：
+- 在使用工具前详细说明思考过程
+- 解释为什么需要使用这个工具
+- 提供完整的答案和反馈
+
+### 配置选项
+
+```python
+agent = Agent(
+    name="Assistant",
+    instructions="你是一个助手",
+    tools=[calculate],
+    use_system_prompt=True,  # 启用默认系统提示（默认值）
+    system_prompt_file="system.md"  # 系统提示文件路径（可自定义）
+)
+```
+
+### 使用场景
+
+- **启用（默认）**: 获得最佳的工具使用体验，AI 会详细说明操作步骤
+- **禁用**: 适用于简单应用，减少系统提示长度
+- **自定义**: 使用自定义的系统提示文件
+
 ## 项目特点
 - ✅ **现代化工具链**: 基于 uv 的包管理
 - ✅ **轻量级设计**: wheel 包仅 12.4KB

@@ -16,7 +16,7 @@ def mock_model() -> Mock:
         content="测试响应",
         tool_calls=[],
         usage=Usage(input_tokens=10, output_tokens=20, total_tokens=30),
-        finish_reason="stop"
+        finish_reason="stop",
     )
     return model
 
@@ -25,9 +25,7 @@ def mock_model() -> Mock:
 def sample_agent(mock_model: Mock) -> Agent:
     """创建一个示例 Agent"""
     return Agent(
-        name="TestAgent",
-        instructions="你是一个测试助手",
-        model=mock_model
+        name="TestAgent", instructions="你是一个测试助手", model=mock_model
     )
 
 
@@ -40,6 +38,7 @@ def sample_context() -> Context:
 @pytest.fixture
 def sample_tool() -> Tool:
     """创建一个示例工具"""
+
     @function_tool
     def test_function(x: int, y: int) -> int:
         """测试函数：返回两数之和"""
@@ -55,6 +54,6 @@ def agent_with_tools(mock_model: Mock, sample_tool: Tool) -> Agent:
         name="TestAgentWithTools",
         instructions="你是一个可以使用工具的测试助手",
         model=mock_model,
-        tools=[sample_tool]
+        tools=[sample_tool],
     )
     return agent
