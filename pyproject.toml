@@ -22,8 +22,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -71,7 +69,7 @@ packages = ["src/zipagent"]
 [tool.pyright]
 include = ["src", "tests"]
 exclude = ["**/node_modules", "**/__pycache__", "build", "dist"]
-pythonVersion = "3.8"
+pythonVersion = "3.10"
 pythonPlatform = "All"
 typeCheckingMode = "strict"
 reportMissingImports = true
@@ -81,7 +79,7 @@ reportGeneralTypeIssues = true
 reportOptionalCall = false
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py310"
 line-length = 79  # 设置为79字符换行
 indent-width = 4
 

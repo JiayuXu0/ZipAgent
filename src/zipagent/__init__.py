@@ -23,6 +23,7 @@ from .tool import Tool, function_tool
 # MCP 工具相关导入（可选）
 try:
     from .mcp_tool import MCPTool, MCPToolGroup
+
     _MCP_AVAILABLE = True
 except ImportError:
     _MCP_AVAILABLE = False
@@ -51,10 +52,7 @@ __all__ = [
     # 工具装饰器
     "function_tool",
     # MCP 工具（可选）
-    *([
-        "MCPTool",
-        "MCPToolGroup"
-    ] if _MCP_AVAILABLE else []),
+    *(["MCPTool", "MCPToolGroup"] if _MCP_AVAILABLE else []),
     # 异常类
     "LiteAgentError",
     "ModelError",

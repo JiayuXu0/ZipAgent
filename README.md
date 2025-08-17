@@ -13,11 +13,13 @@
 [![Python version](https://img.shields.io/pypi/pyversions/zipagent.svg)](https://pypi.org/project/zipagent/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[📚 文档](https://jiayuxu0.github.io/zipagent) | [🚀 快速开始](#-快速开始) | [💬 讨论](https://github.com/JiayuXu0/LiteAgent/discussions) | [🐛 问题反馈](https://github.com/JiayuXu0/LiteAgent/issues)
+[📚 文档](https://jiayuxu0.github.io/zipagent) | [🚀 快速开始](#-快速开始) | [💬 讨论](https://github.com/JiayuXu0/LiteAgent/discussions) | [🐛 问题反馈](https://github.com/JiayuXu0/LiteAgent/issues) | [🌍 English](README_EN.md)
 
 </div>
 
-ZipAgent 是一个现代化的 Python AI Agent 框架，专注于简洁、高效和易扩展。无论是构建聊天机器人、智能助手还是复杂的 AI 工作流，ZipAgent 都能让你快速上手。
+ZipAgent 是一个现代化的 Python AI Agent 框架，专注于简洁、高效和易扩展。**仅用 700 行核心代码实现 Agent 引擎、工具系统、对话管理的完整智能体框架，让你快速构建专属的 AI 助手。**
+
+**🎯 适用场景**：智能客服、代码助手、数据分析、内容生成、知识问答等各类 AI 应用。
 
 ## ✨ 核心特性
 
@@ -193,16 +195,6 @@ ZipAgent/
 └── docs/                   # 文档
 ```
 
-## 📦 依赖
-
-**核心依赖**:
-- `openai` - OpenAI API 客户端
-- `pydantic` - 数据验证
-
-**可选依赖**:
-- `mcp` - MCP 工具支持
-- `nest-asyncio` - 嵌套异步支持
-- `python-dotenv` - 环境变量管理
 
 ## 🛠️ 开发
 
@@ -234,14 +226,6 @@ uv run pyright
 3. 📝 **文档改进**: 完善文档和示例
 4. 🔧 **代码贡献**: 提交 Pull Request
 
-### 开发规范
-
-- 使用 `ruff` 进行代码格式化和检查
-- 使用 `pyright` 进行类型检查
-- 编写测试用例，保持高覆盖率
-- 遵循语义化版本规范
-
-
 ## 📄 许可证
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
@@ -253,4 +237,3 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 - OpenAI - 提供强大的 LLM API
 - MCP 社区 - Model Context Protocol 标准
 - Python 生态 - 优秀的开发工具链
-
