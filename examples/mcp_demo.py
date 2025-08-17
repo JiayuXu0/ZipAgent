@@ -10,6 +10,7 @@ LiteAgent MCP 工具演示
 """
 
 import asyncio
+import datetime
 
 from zipagent import Agent, function_tool
 
@@ -111,6 +112,16 @@ async def demo_2_system_prompt_integration():
     print("仅包含基本指令: ✅")
 
 
+@function_tool
+def get_current_time() -> str:
+    """获取当前时间
+
+    Returns:
+        str: 格式化的当前时间字符串
+    """
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
 async def demo_3_real_mcp_usage():
     """演示3: 真实 MCP 工具使用"""
     print("\n" + "=" * 60)
@@ -136,7 +147,6 @@ async def demo_3_real_mcp_usage():
             command="npx",
             args=["-y", "@amap/amap-maps-mcp-server"],
             env={"AMAP_MAPS_API_KEY": amap_api_key},
-            tools=["maps_geo", "maps_weather"],  # 使用正确的工具名称
             name="amap",
         )
 
@@ -145,14 +155,14 @@ async def demo_3_real_mcp_usage():
 
         # 创建混合工具的 Agent
         agent = Agent(
-            name="地图助手",
-            instructions="""你是一个智能地图助手，具有以下能力：
-1. 使用高德地图API搜索位置、获取天气
-2. 计算两点间的直线距离
-3. 提供详细的地理信息
-
-请始终提供准确、有用的地理信息。""",
-            tools=[calculate_distance, amap_tools],  # 混合使用！
+            name="智能助手",
+            instructions="""你是一个智能助手""",
+            tools=[
+                calculate_distance,
+                amap_tools,
+                calculate,
+                get_current_time,
+            ],  # 混合使用！
             use_system_prompt=True,  # 使用工具规范
         )
 
@@ -171,9 +181,8 @@ async def demo_3_real_mcp_usage():
 
         # 演示问题列表
         demo_questions = [
-            "北京故宫的坐标是什么？",
-            "北京今天的天气怎么样？",
-            "计算北京故宫(116.407387,39.904179)到天安门(116.397477,39.909652)的距离",
+            "计算北京故宫往东100公里是什么地方呢",
+            "现在的小时数再乘以10，再乘以100是多少呢",
         ]
 
         for i, question in enumerate(demo_questions, 1):
@@ -293,10 +302,10 @@ async def main():
     print("展示 MCP 工具集成的完整功能")
 
     try:
-        await demo_1_mcp_integration()
-        await demo_2_system_prompt_integration()
+        # await demo_1_mcp_integration()
+        # await demo_2_system_prompt_integration()
         await demo_3_real_mcp_usage()
-        await demo_4_quick_examples()
+        # await demo_4_quick_examples()
 
         print("\n" + "=" * 60)
         print("✅ MCP 演示完成！")

@@ -33,17 +33,17 @@ class Context:
 
     data: Dict[str, Any] = field(default_factory=dict)
     """自定义数据存储"""
-    
+
     # === 新增元数据字段 ===
     context_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     """上下文唯一标识"""
-    
+
     created_at: datetime = field(default_factory=datetime.now)
     """创建时间"""
-    
+
     last_agent: Optional[str] = None
     """最后使用的 Agent 名称"""
-    
+
     turn_count: int = 0
     """对话轮次计数"""
 
@@ -101,7 +101,7 @@ class Context:
         """清空对话历史"""
         self.messages.clear()
         self.turn_count = 0
-    
+
     def get_summary(self) -> Dict[str, Any]:
         """获取上下文摘要信息"""
         return {
@@ -112,16 +112,17 @@ class Context:
             "message_count": len(self.messages),
             "total_tokens": self.usage.total_tokens,
         }
-    
+
     def clone(self) -> "Context":
         """克隆上下文（用于传递给其他 Agent）"""
         import copy
+
         new_context = Context()
         new_context.messages = copy.deepcopy(self.messages)
         new_context.usage = Usage(
             self.usage.input_tokens,
             self.usage.output_tokens,
-            self.usage.total_tokens
+            self.usage.total_tokens,
         )
         new_context.data = copy.deepcopy(self.data)
         # 保持相同的 context_id 表示是同一个对话

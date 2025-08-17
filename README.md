@@ -1,11 +1,21 @@
-# ZipAgent
+<div align="center">
+
+⭐ **如果这个项目对你有帮助，请给我们一个 Star！** ⭐
+
+<p align="center">
+  <img src="docs/assets/logo.jpg" alt="ZipAgent Logo" width="120"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=45&duration=3000&pause=1000&color=2E86AB&center=true&vCenter=true&width=300&height=60&lines=ZipAgent" alt="ZipAgent Title"/>
+</p>
 
 [![PyPI version](https://badge.fury.io/py/zipagent.svg)](https://badge.fury.io/py/zipagent)
+[![Downloads](https://pepy.tech/badge/zipagent)](https://pepy.tech/project/zipagent)
 [![Python version](https://img.shields.io/pypi/pyversions/zipagent.svg)](https://pypi.org/project/zipagent/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/JiayuXu0/LiteAgent/workflows/tests/badge.svg)](https://github.com/JiayuXu0/LiteAgent/actions)
 
-> 🚀 轻量级的 AI Agent 框架，让 AI 工具集成变得简单高效
+[📚 文档](https://jiayuxu0.github.io/zipagent) | [🚀 快速开始](#-快速开始) | [💬 讨论](https://github.com/JiayuXu0/LiteAgent/discussions) | [🐛 问题反馈](https://github.com/JiayuXu0/LiteAgent/issues)
+
+</div>
 
 ZipAgent 是一个现代化的 Python AI Agent 框架，专注于简洁、高效和易扩展。无论是构建聊天机器人、智能助手还是复杂的 AI 工作流，ZipAgent 都能让你快速上手。
 
@@ -259,5 +269,3 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 - Python 生态 - 优秀的开发工具链
 
 ---
-
-⭐ 如果这个项目对你有帮助，请给我们一个 Star！

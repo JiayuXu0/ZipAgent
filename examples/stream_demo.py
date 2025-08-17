@@ -28,7 +28,7 @@ def calculate(expression: str) -> str:
     """计算数学表达式"""
     try:
         result = eval(expression)
-        time.sleep(3)
+        time.sleep(1)
         return str(result)
     except Exception as e:
         return f"计算错误: {e}"

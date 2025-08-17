@@ -14,12 +14,16 @@
     "python.formatting.provider": "none",
     "[python]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "charliermarsh.ruff"
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": true
     },
     "editor.codeActionsOnSave": {
         "source.fixAll.ruff": "explicit",
         "source.organizeImports.ruff": "explicit"
     },
+    "ruff.format.args": ["--line-length=79"],
+    "ruff.lint.args": ["--line-length=79"],
     "python.analysis.typeCheckingMode": "off",
     "pylsp.plugins.pycodestyle.enabled": false,
     "pylsp.plugins.pylint.enabled": false,

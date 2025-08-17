@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zipagent"
-version = "0.1.1"
+version = "0.1.2"
 description = "轻量级的 AI Agent 框架"
 readme = "README.md"
 license = {text = "MIT"}
@@ -45,6 +45,8 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-asyncio>=0.21.0",
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.5.3",
 ]
 all = [
     "python-dotenv>=1.0.0",
@@ -97,7 +99,6 @@ select = [
     "RUF",    # Ruff 特定规则
 ]
 ignore = [
-    "E501",   # 行太长（由 line-length 控制）
     "B008",   # 函数调用中的可变参数默认值
 ]
 fixable = ["ALL"]
@@ -108,6 +109,9 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+# 启用自动换行
+docstring-code-format = true
+docstring-code-line-length = 79
 
 [tool.ruff.lint.isort]
 known-first-party = ["zipagent"]
@@ -165,4 +169,6 @@ dev = [
     "pytest-cov>=5.0.0",
     "ruff>=0.12.8",
     "twine>=6.1.0",
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.5.3",
 ]
