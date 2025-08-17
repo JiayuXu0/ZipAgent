@@ -19,7 +19,44 @@
 
 ZipAgent is a modern Python AI Agent framework focused on simplicity, efficiency, and extensibility. **Built with just 700 lines of core code to implement a complete intelligent agent framework with Agent engine, tool system, and conversation management, enabling you to quickly build your own AI assistant.**
 
-**🎯 Use Cases**: Customer service bots, code assistants, data analysis, content generation, workflow automation, knowledge Q&A, and various AI applications.
+## 🎯 Use Cases
+
+<table>
+<tr>
+<td align="center">
+  <img src="docs/assets/icon_chatbot.png" width="60px" alt="Customer Service"/>
+  <br/><b>Customer Service</b><br/>
+  <small>Auto-answer FAQs<br/>Handle order inquiries</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_code.png" width="60px" alt="Code Assistant"/>
+  <br/><b>Code Assistant</b><br/>
+  <small>Code review & generation<br/>Bug fix suggestions</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_data.png" width="60px" alt="Data Analysis"/>
+  <br/><b>Data Analysis</b><br/>
+  <small>Auto-generate reports<br/>Discover insights</small>
+</td>
+</tr>
+<tr>
+<td align="center">
+  <img src="docs/assets/icon_content.png" width="60px" alt="Content Generation"/>
+  <br/><b>Content Generation</b><br/>
+  <small>Writing assistant<br/>Marketing content</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_automation.png" width="60px" alt="Workflow Automation"/>
+  <br/><b>Workflow Automation</b><br/>
+  <small>Task scheduling<br/>Process automation</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_qa.png" width="60px" alt="Knowledge Q&A"/>
+  <br/><b>Knowledge Q&A</b><br/>
+  <small>Enterprise knowledge base<br/>Smart Q&A system</small>
+</td>
+</tr>
+</table>
 
 ## ✨ Core Features
 

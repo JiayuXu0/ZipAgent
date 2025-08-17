@@ -19,7 +19,44 @@
 
 ZipAgent 是一个现代化的 Python AI Agent 框架，专注于简洁、高效和易扩展。**仅用 700 行核心代码实现 Agent 引擎、工具系统、对话管理的完整智能体框架，让你快速构建专属的 AI 助手。**
 
-**🎯 适用场景**：智能客服、代码助手、数据分析、内容生成、知识问答等各类 AI 应用。
+## 🎯 应用场景
+
+<table>
+<tr>
+<td align="center">
+  <img src="docs/assets/icon_chatbot.png" width="60px" alt="智能客服"/>
+  <br/><b>智能客服</b><br/>
+  <small>自动回答常见问题<br/>处理订单查询</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_code.png" width="60px" alt="代码助手"/>
+  <br/><b>代码助手</b><br/>
+  <small>代码review和生成<br/>bug修复建议</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_data.png" width="60px" alt="数据分析"/>
+  <br/><b>数据分析</b><br/>
+  <small>自动生成报表<br/>数据洞察发现</small>
+</td>
+</tr>
+<tr>
+<td align="center">
+  <img src="docs/assets/icon_content.png" width="60px" alt="内容生成"/>
+  <br/><b>内容生成</b><br/>
+  <small>文章写作助手<br/>营销文案生成</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_automation.png" width="60px" alt="工作流自动化"/>
+  <br/><b>工作流自动化</b><br/>
+  <small>任务调度执行<br/>流程自动化</small>
+</td>
+<td align="center">
+  <img src="docs/assets/icon_qa.png" width="60px" alt="知识问答"/>
+  <br/><b>知识问答</b><br/>
+  <small>企业知识库<br/>智能问答系统</small>
+</td>
+</tr>
+</table>
 
 ## ✨ 核心特性
 

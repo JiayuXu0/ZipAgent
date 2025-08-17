@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zipagent"
-version = "0.1.2"
+version = "0.1.4"
 description = "轻量级的 AI Agent 框架"
 readme = "README.md"
 license = {text = "MIT"}
@@ -38,6 +38,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "matplotlib>=3.10.5",
     "pyright>=1.1.350",
     "ruff>=0.1.0",
     "pytest>=7.0.0",
