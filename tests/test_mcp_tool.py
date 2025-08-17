@@ -100,7 +100,7 @@ class TestMCPToolPool:
     @pytest.mark.asyncio
     async def test_add_mcp_server_without_mcp(self):
         """测试在没有 MCP SDK 的情况下添加服务器"""
-        with patch('liteagent.mcp_tool.MCP_AVAILABLE', False):
+        with patch('zipagent.mcp_tool.MCP_AVAILABLE', False):
             pool = _MCPToolPool()
 
             with pytest.raises(MCPNotAvailableError):

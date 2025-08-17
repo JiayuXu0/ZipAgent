@@ -188,7 +188,7 @@ class MCPClient:
 
 
 class MCPTool(Tool):
-    """MCP 工具包装器，将 MCP 工具包装为 LiteAgent 工具"""
+    """MCP 工具包装器，将 MCP 工具包装为 ZipAgent 工具"""
     
     # 类级别的连接管理
     _global_pool: Optional['_MCPToolPool'] = None

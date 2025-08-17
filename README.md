@@ -13,7 +13,7 @@
 [![Python version](https://img.shields.io/pypi/pyversions/zipagent.svg)](https://pypi.org/project/zipagent/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[📚 文档](https://jiayuxu0.github.io/zipagent) | [🚀 快速开始](#-快速开始) | [💬 讨论](https://github.com/JiayuXu0/LiteAgent/discussions) | [🐛 问题反馈](https://github.com/JiayuXu0/LiteAgent/issues) | [🌍 English](README_EN.md)
+[📚 文档](https://jiayuxu0.github.io/zipagent) | [🚀 快速开始](#-快速开始) | [💬 讨论](https://github.com/JiayuXu0/ZipAgent/discussions) | [🐛 问题反馈](https://github.com/JiayuXu0/ZipAgent/issues) | [🌍 English](README_EN.md)
 
 </div>
 
@@ -239,8 +239,8 @@ ZipAgent/
 
 ```bash
 # 克隆项目
-git clone https://github.com/JiayuXu0/LiteAgent.git
-cd LiteAgent
+git clone https://github.com/JiayuXu0/ZipAgent.git
+cd ZipAgent
 
 # 使用 uv 管理依赖（推荐）
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -258,7 +258,7 @@ uv run pyright
 
 我们欢迎各种形式的贡献！
 
-1. 🐛 **报告 Bug**: 提交 [Issue](https://github.com/JiayuXu0/LiteAgent/issues)
+1. 🐛 **报告 Bug**: 提交 [Issue](https://github.com/JiayuXu0/ZipAgent/issues)
 2. 💡 **功能建议**: 讨论新功能想法
 3. 📝 **文档改进**: 完善文档和示例
 4. 🔧 **代码贡献**: 提交 Pull Request

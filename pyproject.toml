@@ -52,9 +52,9 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/JiayuXu0/LiteAgent"
-Repository = "https://github.com/JiayuXu0/LiteAgent.git"
-Issues = "https://github.com/JiayuXu0/LiteAgent/issues"
+Homepage = "https://github.com/JiayuXu0/ZipAgent"
+Repository = "https://github.com/JiayuXu0/ZipAgent.git"
+Issues = "https://github.com/JiayuXu0/ZipAgent/issues"
 
 [tool.hatch.build.targets.sdist]
 include = [

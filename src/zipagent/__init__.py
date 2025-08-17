@@ -5,7 +5,7 @@ from .context import Context
 from .exceptions import (
     ConfigurationError,
     ContextError,
-    LiteAgentError,
+    ZipAgentError,
     MaxTurnsError,
     ModelError,
     ResponseParseError,
@@ -54,7 +54,7 @@ __all__ = [
     # MCP 工具（可选）
     *(["MCPTool", "MCPToolGroup"] if _MCP_AVAILABLE else []),
     # 异常类
-    "LiteAgentError",
+    "ZipAgentError",
     "ModelError",
     "ToolError",
     "ToolNotFoundError",

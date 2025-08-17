@@ -4,25 +4,25 @@
 from zipagent.exceptions import (
     ConfigurationError,
     ContextError,
-    LiteAgentError,
+    ZipAgentError,
     MaxTurnsError,
     ModelError,
     ResponseParseError,
     StreamError,
-    TokenLimitError,
     ToolError,
     ToolExecutionError,
     ToolNotFoundError,
+    TokenLimitError,
     create_error_with_context,
 )
 
 
-class TestLiteAgentError:
+class TestZipAgentError:
     """测试基础异常类"""
 
     def test_basic_error(self):
         """测试基础异常创建"""
-        error = LiteAgentError("测试错误")
+        error = ZipAgentError("测试错误")
         assert str(error) == "测试错误"
         assert error.message == "测试错误"
         assert error.details == {}
@@ -31,13 +31,13 @@ class TestLiteAgentError:
     def test_error_with_details(self):
         """测试带详情的异常"""
         details = {"key": "value", "count": 42}
-        error = LiteAgentError("测试错误", details=details)
+        error = ZipAgentError("测试错误", details=details)
         assert error.details == details
 
     def test_error_with_original(self):
         """测试带原始异常的错误"""
         original = ValueError("原始错误")
-        error = LiteAgentError("包装错误", original_error=original)
+        error = ZipAgentError("包装错误", original_error=original)
         assert error.original_error == original
         assert "原因: 原始错误" in str(error)
 
@@ -103,7 +103,7 @@ class TestContextError:
     def test_context_error(self):
         """测试上下文错误"""
         error = ContextError("上下文无效")
-        assert isinstance(error, LiteAgentError)
+        assert isinstance(error, ZipAgentError)
         assert error.message == "上下文无效"
 
     def test_token_limit_error(self):
@@ -169,7 +169,7 @@ class TestStreamError:
     def test_stream_error(self):
         """测试流式错误"""
         error = StreamError("流式处理失败")
-        assert isinstance(error, LiteAgentError)
+        assert isinstance(error, ZipAgentError)
         assert error.message == "流式处理失败"
 
 
@@ -195,7 +195,7 @@ class TestErrorWithContext:
     def test_create_error_minimal(self):
         """测试最小上下文错误"""
         error = create_error_with_context(
-            LiteAgentError,
+            ZipAgentError,
             "简单错误"
         )
         assert error.message == "简单错误"

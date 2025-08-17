@@ -1,4 +1,4 @@
-"""LiteAgent 异常系统
+"""ZipAgent 异常系统
 
 提供结构化的异常类型，帮助用户准确识别和处理错误。
 """
@@ -6,8 +6,8 @@
 from typing import Any, Dict, Optional
 
 
-class LiteAgentError(Exception):
-    """LiteAgent 基础异常类"""
+class ZipAgentError(Exception):
+    """ZipAgent 基础异常类"""
 
     def __init__(
         self,
@@ -26,7 +26,7 @@ class LiteAgentError(Exception):
         return self.message
 
 
-class ModelError(LiteAgentError):
+class ModelError(ZipAgentError):
     """模型调用相关错误"""
 
     def __init__(
@@ -40,7 +40,7 @@ class ModelError(LiteAgentError):
         super().__init__(message, details, **kwargs)
 
 
-class ToolError(LiteAgentError):
+class ToolError(ZipAgentError):
     """工具执行相关错误"""
 
     def __init__(
@@ -81,7 +81,7 @@ class ToolExecutionError(ToolError):
         )
 
 
-class ContextError(LiteAgentError):
+class ContextError(ZipAgentError):
     """上下文管理相关错误"""
     pass
 
@@ -100,7 +100,7 @@ class TokenLimitError(ContextError):
         super().__init__(msg, details)
 
 
-class MaxTurnsError(LiteAgentError):
+class MaxTurnsError(ZipAgentError):
     """达到最大执行轮次"""
 
     def __init__(self, max_turns: int):
@@ -110,7 +110,7 @@ class MaxTurnsError(LiteAgentError):
         )
 
 
-class ResponseParseError(LiteAgentError):
+class ResponseParseError(ZipAgentError):
     """响应解析错误"""
 
     def __init__(
@@ -123,7 +123,7 @@ class ResponseParseError(LiteAgentError):
         super().__init__(message, details, **kwargs)
 
 
-class ConfigurationError(LiteAgentError):
+class ConfigurationError(ZipAgentError):
     """配置错误"""
 
     def __init__(self, message: str, config_key: Optional[str] = None):
@@ -131,7 +131,7 @@ class ConfigurationError(LiteAgentError):
         super().__init__(message, details)
 
 
-class StreamError(LiteAgentError):
+class StreamError(ZipAgentError):
     """流式处理相关错误"""
     pass
 
@@ -143,7 +143,7 @@ def create_error_with_context(
     agent_name: Optional[str] = None,
     user_input: Optional[str] = None,
     **kwargs
-) -> LiteAgentError:
+) -> ZipAgentError:
     """创建带有执行上下文的异常"""
     # 创建错误实例
     error = error_class(message, **kwargs)

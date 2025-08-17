@@ -69,7 +69,7 @@ class Agent:
             if os.path.isabs(self.system_prompt_file):
                 file_path = self.system_prompt_file
             else:
-                # 相对路径：先尝试 liteagent 包目录，再尝试当前工作目录
+                # 相对路径：先尝试 zipagent 包目录，再尝试当前工作目录
                 package_dir = os.path.dirname(__file__)
                 package_file_path = os.path.join(
                     package_dir, self.system_prompt_file

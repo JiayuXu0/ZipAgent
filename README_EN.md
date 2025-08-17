@@ -13,7 +13,7 @@
 [![Python version](https://img.shields.io/pypi/pyversions/zipagent.svg)](https://pypi.org/project/zipagent/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[📚 Documentation](https://jiayuxu0.github.io/zipagent) | [🚀 Quick Start](#-quick-start) | [💬 Discussions](https://github.com/JiayuXu0/LiteAgent/discussions) | [🐛 Issues](https://github.com/JiayuXu0/LiteAgent/issues) | [🇨🇳 中文](README.md)
+[📚 Documentation](https://jiayuxu0.github.io/zipagent) | [🚀 Quick Start](#-quick-start) | [💬 Discussions](https://github.com/JiayuXu0/ZipAgent/discussions) | [🐛 Issues](https://github.com/JiayuXu0/ZipAgent/issues) | [🇨🇳 中文](README.md)
 
 </div>
 
@@ -226,8 +226,8 @@ ZipAgent/
 
 ```bash
 # Clone project
-git clone https://github.com/JiayuXu0/LiteAgent.git
-cd LiteAgent
+git clone https://github.com/JiayuXu0/ZipAgent.git
+cd ZipAgent
 
 # Use uv for dependency management (recommended)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -245,7 +245,7 @@ uv run pyright
 
 We welcome all forms of contributions!
 
-1. 🐛 **Report Bugs**: Submit [Issues](https://github.com/JiayuXu0/LiteAgent/issues)
+1. 🐛 **Report Bugs**: Submit [Issues](https://github.com/JiayuXu0/ZipAgent/issues)
 2. 💡 **Feature Suggestions**: Discuss new feature ideas
 3. 📝 **Documentation**: Improve docs and examples
 4. 🔧 **Code Contributions**: Submit Pull Requests
@@ -285,3 +285,9 @@ Thanks to all contributors and community support!
 - Python Ecosystem - Excellent development toolchain
 
 ---
+
+<div align="center">
+  <a href="https://github.com/JiayuXu0/ZipAgent">
+    <img src="https://img.shields.io/github/stars/JiayuXu0/ZipAgent?style=social" alt="GitHub stars">
+  </a>
+</div>

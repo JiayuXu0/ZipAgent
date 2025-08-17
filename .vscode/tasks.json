@@ -22,7 +22,7 @@
             "label": "Run Tests with Coverage",
             "type": "shell",
             "command": "uv",
-            "args": ["run", "pytest", "tests/", "--cov=src/liteagent", "--cov-report=html", "-v"],
+            "args": ["run", "pytest", "tests/", "--cov=src/zipagent", "--cov-report=html", "-v"],
             "group": "test",
             "presentation": {
                 "echo": true,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LiteAgent MCP 工具演示
+ZipAgent MCP 工具演示
 
 展示 MCP (Model Context Protocol) 工具集成：
 1. 新的 MCPTool.connect() API
