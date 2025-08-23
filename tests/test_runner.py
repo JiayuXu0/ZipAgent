@@ -11,7 +11,23 @@ from zipagent import (
     StreamEventType,
     function_tool,
 )
-from zipagent.model import Usage
+from zipagent.model import Usage, StreamDelta
+
+
+def mock_generate_stream(content, tool_calls=None, usage=None):
+    """辅助函数：模拟流式响应"""
+    # 先逐字符yield StreamDelta
+    if content:
+        for char in content:
+            yield StreamDelta(content=char)
+    
+    # 最后yield完整的ModelResponse
+    yield ModelResponse(
+        content=content,
+        tool_calls=tool_calls,
+        usage=usage or Usage(),
+        finish_reason="stop"
+    )
 
 
 @function_tool
@@ -43,13 +59,18 @@ class TestRunner:
             content="你好！我是AI助手。",
             tool_calls=None,
             usage=Usage(input_tokens=10, output_tokens=20, total_tokens=30),
-            finish_reason="stop"
+            finish_reason="stop",
+        )
+        # 模拟流式响应
+        mock_model.generate_stream.return_value = mock_generate_stream(
+            "你好！我是AI助手。",
+            usage=Usage(input_tokens=10, output_tokens=20, total_tokens=30)
         )
 
         agent = Agent(
             name="TestAgent",
             instructions="你是一个友好的助手",
-            model=mock_model
+            model=mock_model,
         )
 
         result = Runner.run(agent, "你好")
@@ -76,29 +97,31 @@ class TestRunner:
         mock_model.generate.side_effect = [
             ModelResponse(
                 content="我需要计算这个加法。",
-                tool_calls=[{
-                    "function": {
-                        "name": "add",
-                        "arguments": '{"a": 2, "b": 3}'
+                tool_calls=[
+                    {
+                        "function": {
+                            "name": "add",
+                            "arguments": '{"a": 2, "b": 3}',
+                        }
                     }
-                }],
+                ],
                 usage=Usage(10, 20, 30),
-                finish_reason="tool_calls"
+                finish_reason="tool_calls",
             ),
             # 第二次调用：返回最终答案
             ModelResponse(
                 content="2 + 3 = 5",
                 tool_calls=None,
                 usage=Usage(15, 25, 40),
-                finish_reason="stop"
-            )
+                finish_reason="stop",
+            ),
         ]
 
         agent = Agent(
             name="Calculator",
             instructions="你是一个计算器",
             model=mock_model,
-            tools=[add]
+            tools=[add],
         )
 
         result = Runner.run(agent, "计算 2 + 3")
@@ -118,28 +141,25 @@ class TestRunner:
         mock_model.generate.side_effect = [
             ModelResponse(
                 content="调用工具",
-                tool_calls=[{
-                    "function": {
-                        "name": "failing_tool",
-                        "arguments": '{}'
-                    }
-                }],
+                tool_calls=[
+                    {"function": {"name": "failing_tool", "arguments": "{}"}}
+                ],
                 usage=Usage(10, 20, 30),
-                finish_reason="tool_calls"
+                finish_reason="tool_calls",
             ),
             ModelResponse(
                 content="工具执行失败了",
                 tool_calls=None,
                 usage=Usage(10, 20, 30),
-                finish_reason="stop"
-            )
+                finish_reason="stop",
+            ),
         ]
 
         agent = Agent(
             name="TestAgent",
             instructions="测试",
             model=mock_model,
-            tools=[failing_tool]
+            tools=[failing_tool],
         )
 
         result = Runner.run(agent, "执行工具")
@@ -149,7 +169,11 @@ class TestRunner:
 
         # 验证错误消息被添加到上下文
         messages = result.context.messages
-        error_messages = [m for m in messages if m.get("role") == "system" and "执行失败" in m.get("content", "")]
+        error_messages = [
+            m
+            for m in messages
+            if m.get("role") == "system" and "执行失败" in m.get("content", "")
+        ]
         assert len(error_messages) > 0
 
     def test_run_with_max_turns(self):
@@ -158,21 +182,23 @@ class TestRunner:
         # 总是返回工具调用，导致无限循环
         mock_model.generate.return_value = ModelResponse(
             content="继续调用",
-            tool_calls=[{
-                "function": {
-                    "name": "echo",
-                    "arguments": '{"message": "loop"}'
+            tool_calls=[
+                {
+                    "function": {
+                        "name": "echo",
+                        "arguments": '{"message": "loop"}',
+                    }
                 }
-            }],
+            ],
             usage=Usage(10, 20, 30),
-            finish_reason="tool_calls"
+            finish_reason="tool_calls",
         )
 
         agent = Agent(
             name="LoopAgent",
             instructions="测试循环",
             model=mock_model,
-            tools=[echo]
+            tools=[echo],
         )
 
         result = Runner.run(agent, "开始", max_turns=3)
@@ -187,7 +213,7 @@ class TestRunner:
             content="继续对话",
             tool_calls=None,
             usage=Usage(10, 20, 30),
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
         # 创建一个有历史的上下文
@@ -195,11 +221,7 @@ class TestRunner:
         context.add_message("user", "第一个问题")
         context.add_message("assistant", "第一个回答")
 
-        agent = Agent(
-            name="TestAgent",
-            instructions="测试",
-            model=mock_model
-        )
+        agent = Agent(name="TestAgent", instructions="测试", model=mock_model)
 
         result = Runner.run(agent, "第二个问题", context=context)
 
@@ -215,17 +237,14 @@ class TestRunner:
             content="测试回答",
             tool_calls=None,
             usage=Usage(10, 20, 30),
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
-        agent = Agent(
-            name="TestAgent",
-            instructions="测试",
-            model=mock_model
-        )
+        agent = Agent(name="TestAgent", instructions="测试", model=mock_model)
 
         # 记录流式事件
         events = []
+
         def callback(event: StreamEvent):
             events.append(event)
 
@@ -246,14 +265,10 @@ class TestRunner:
             content="流式回答",
             tool_calls=None,
             usage=Usage(10, 20, 30),
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
-        agent = Agent(
-            name="TestAgent",
-            instructions="测试",
-            model=mock_model
-        )
+        agent = Agent(name="TestAgent", instructions="测试", model=mock_model)
 
         # 收集所有事件
         events = []
@@ -267,7 +282,9 @@ class TestRunner:
         # 验证事件顺序
         assert events[0].type == StreamEventType.QUESTION
         # 应该有 ANSWER_DELTA 事件（逐字符）
-        delta_events = [e for e in events if e.type == StreamEventType.ANSWER_DELTA]
+        delta_events = [
+            e for e in events if e.type == StreamEventType.ANSWER_DELTA
+        ]
         assert len(delta_events) > 0
 
         # 最后应该是完整的 ANSWER
@@ -281,28 +298,30 @@ class TestRunner:
         mock_model.generate.side_effect = [
             ModelResponse(
                 content="需要计算",
-                tool_calls=[{
-                    "function": {
-                        "name": "add",
-                        "arguments": '{"a": 5, "b": 7}'
+                tool_calls=[
+                    {
+                        "function": {
+                            "name": "add",
+                            "arguments": '{"a": 5, "b": 7}',
+                        }
                     }
-                }],
+                ],
                 usage=Usage(10, 20, 30),
-                finish_reason="tool_calls"
+                finish_reason="tool_calls",
             ),
             ModelResponse(
                 content="5 + 7 = 12",
                 tool_calls=None,
                 usage=Usage(10, 20, 30),
-                finish_reason="stop"
-            )
+                finish_reason="stop",
+            ),
         ]
 
         agent = Agent(
             name="Calculator",
             instructions="计算器",
             model=mock_model,
-            tools=[add]
+            tools=[add],
         )
 
         events = []
@@ -328,17 +347,15 @@ class TestRunner:
             content="回答",
             tool_calls=None,
             usage=Usage(10, 20, 30),
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
         agent = Agent(
-            name="ChatBot",
-            instructions="聊天机器人",
-            model=mock_model
+            name="ChatBot", instructions="聊天机器人", model=mock_model
         )
 
         # 模拟用户输入
-        with patch('builtins.input', side_effect=["测试问题", "quit"]):
+        with patch("builtins.input", side_effect=["测试问题", "quit"]):
             context = Runner.chat(agent)
 
         assert len(context.messages) > 0
@@ -351,14 +368,10 @@ class TestRunner:
             content=None,
             tool_calls=None,
             usage=Usage(10, 20, 30),
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
-        agent = Agent(
-            name="TestAgent",
-            instructions="测试",
-            model=mock_model
-        )
+        agent = Agent(name="TestAgent", instructions="测试", model=mock_model)
 
         result = Runner.run(agent, "测试")
 
@@ -371,28 +384,30 @@ class TestRunner:
         mock_model.generate.side_effect = [
             ModelResponse(
                 content="调用工具",
-                tool_calls=[{
-                    "function": {
-                        "name": "non_existent_tool",
-                        "arguments": '{}'
+                tool_calls=[
+                    {
+                        "function": {
+                            "name": "non_existent_tool",
+                            "arguments": "{}",
+                        }
                     }
-                }],
+                ],
                 usage=Usage(10, 20, 30),
-                finish_reason="tool_calls"
+                finish_reason="tool_calls",
             ),
             ModelResponse(
                 content="工具不存在",
                 tool_calls=None,
                 usage=Usage(10, 20, 30),
-                finish_reason="stop"
-            )
+                finish_reason="stop",
+            ),
         ]
 
         agent = Agent(
             name="TestAgent",
             instructions="测试",
             model=mock_model,
-            tools=[]  # 没有工具
+            tools=[],  # 没有工具
         )
 
         result = Runner.run(agent, "调用不存在的工具")
@@ -401,7 +416,12 @@ class TestRunner:
 
         # 验证错误消息
         messages = result.context.messages
-        error_messages = [m for m in messages if m.get("role") == "system" and "找不到工具" in m.get("content", "")]
+        error_messages = [
+            m
+            for m in messages
+            if m.get("role") == "system"
+            and "找不到工具" in m.get("content", "")
+        ]
         assert len(error_messages) > 0
 
     def test_invalid_tool_arguments(self):
@@ -410,28 +430,30 @@ class TestRunner:
         mock_model.generate.side_effect = [
             ModelResponse(
                 content="调用工具",
-                tool_calls=[{
-                    "function": {
-                        "name": "add",
-                        "arguments": 'invalid json'  # 无效的JSON
+                tool_calls=[
+                    {
+                        "function": {
+                            "name": "add",
+                            "arguments": "invalid json",  # 无效的JSON
+                        }
                     }
-                }],
+                ],
                 usage=Usage(10, 20, 30),
-                finish_reason="tool_calls"
+                finish_reason="tool_calls",
             ),
             ModelResponse(
                 content="参数错误",
                 tool_calls=None,
                 usage=Usage(10, 20, 30),
-                finish_reason="stop"
-            )
+                finish_reason="stop",
+            ),
         ]
 
         agent = Agent(
             name="TestAgent",
             instructions="测试",
             model=mock_model,
-            tools=[add]
+            tools=[add],
         )
 
         result = Runner.run(agent, "测试无效参数")

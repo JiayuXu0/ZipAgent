@@ -2,8 +2,9 @@
 
 import os
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from dataclasses import dataclass
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import Any
 
 from .context import Usage
 
@@ -20,8 +21,8 @@ except ImportError:
 class ModelResponse:
     """模型响应结果"""
 
-    content: Optional[str]
-    tool_calls: Optional[List[Dict[str, Any]]]
+    content: str | None
+    tool_calls: list[dict[str, Any]] | None
     usage: Usage
     finish_reason: str
 
@@ -30,9 +31,9 @@ class ModelResponse:
 class StreamDelta:
     """流式响应增量"""
 
-    content: Optional[str] = None
-    tool_calls: Optional[List[Dict[str, Any]]] = None
-    finish_reason: Optional[str] = None
+    content: str | None = None
+    tool_calls: list[dict[str, Any]] | None = None
+    finish_reason: str | None = None
 
 
 class Model(ABC):
@@ -41,17 +42,17 @@ class Model(ABC):
     @abstractmethod
     def generate(
         self,
-        messages: List[Dict[str, Any]],
-        tools: Optional[List[Dict[str, Any]]] = None,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
     ) -> ModelResponse:
         """生成模型响应"""
         pass
 
     def generate_stream(
         self,
-        messages: List[Dict[str, Any]],
-        tools: Optional[List[Dict[str, Any]]] = None,
-    ) -> Generator[Union[StreamDelta, ModelResponse], None, None]:
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+    ) -> Generator[StreamDelta | ModelResponse, None, None]:
         """生成流式响应（可选实现）"""
         # 默认实现：调用普通生成，然后逐字符yield
         response = self.generate(messages, tools)
@@ -67,9 +68,10 @@ class OpenAIModel(Model):
 
     def __init__(
         self,
-        model_name: Optional[str] = None,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        model: str | None = None,  # 统一参数名
+        model_name: str | None = None,  # 兼容旧版本
+        api_key: str | None = None,
+        base_url: str | None = None,
         **kwargs: Any,
     ):
         """
@@ -84,8 +86,10 @@ class OpenAIModel(Model):
         try:
             from openai import OpenAI
 
-            # 从环境变量或参数获取配置
-            self.model_name = model_name or os.getenv("MODEL", "gpt-3.5-turbo")
+            # 从环境变量或参数获取配置，支持两种参数名，优先使用model
+            self.model_name = (
+                model or model_name or os.getenv("MODEL", "gpt-3.5-turbo")
+            )
             self.api_key = api_key or os.getenv("API_KEY")
             self.base_url = base_url or os.getenv("BASE_URL")
 
@@ -102,19 +106,25 @@ class OpenAIModel(Model):
             # 其他参数
             self.kwargs = kwargs.copy()
             # 从环境变量或参数获取 temperature 和 max_tokens
-            env_temp = os.getenv('TEMPERATURE')
-            self.temperature = float(env_temp) if env_temp else kwargs.get('temperature', 0.7)
-            
-            env_max_tokens = os.getenv('MAX_TOKENS')
-            self.max_tokens = int(env_max_tokens) if env_max_tokens else kwargs.get('max_tokens', None)
+            env_temp = os.getenv("TEMPERATURE")
+            self.temperature = (
+                float(env_temp) if env_temp else kwargs.get("temperature", 0.7)
+            )
+
+            env_max_tokens = os.getenv("MAX_TOKENS")
+            self.max_tokens = (
+                int(env_max_tokens)
+                if env_max_tokens
+                else kwargs.get("max_tokens")
+            )
 
         except ImportError as e:
             raise ImportError("需要安装openai包: pip install openai") from e
 
     def generate(
         self,
-        messages: List[Dict[str, Any]],
-        tools: Optional[List[Dict[str, Any]]] = None,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
     ) -> ModelResponse:
         """调用OpenAI生成响应"""
         # 准备API调用参数
@@ -124,7 +134,7 @@ class OpenAIModel(Model):
             "temperature": self.temperature,
             **self.kwargs,
         }
-        
+
         # 只有当 max_tokens 有值时才添加
         if self.max_tokens is not None:
             call_kwargs["max_tokens"] = self.max_tokens
@@ -140,7 +150,7 @@ class OpenAIModel(Model):
         # 解析响应
         message = response.choices[0].message
         content = message.content
-        tool_calls: Optional[List[Dict[str, Any]]] = None
+        tool_calls: list[dict[str, Any]] | None = None
 
         # 处理工具调用
         if message.tool_calls:
@@ -172,20 +182,23 @@ class OpenAIModel(Model):
 
     def generate_stream(
         self,
-        messages: List[Dict[str, Any]],
-        tools: Optional[List[Dict[str, Any]]] = None,
-    ) -> Generator[Union[StreamDelta, ModelResponse], None, None]:
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+    ) -> Generator[StreamDelta | ModelResponse, None, None]:
         """调用OpenAI流式生成响应"""
         try:
             # 准备API调用参数
             call_kwargs = {
                 "model": self.model_name,
                 "messages": messages,
-                "temperature": 0.7,
-                "max_tokens": 1000,
+                "temperature": self.temperature,  # 使用实例变量
                 "stream": True,  # 启用流式
                 **self.kwargs,
             }
+
+            # 只有当 max_tokens 有值时才添加
+            if self.max_tokens is not None:
+                call_kwargs["max_tokens"] = self.max_tokens
 
             # 如果有工具，添加到请求中
             if tools:
@@ -197,7 +210,7 @@ class OpenAIModel(Model):
 
             # 收集完整响应用于最终返回
             full_content = ""
-            tool_calls: List[Dict[str, Any]] = []
+            tool_calls: list[dict[str, Any]] = []
             finish_reason = "stop"
             usage = Usage()
 

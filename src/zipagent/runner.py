@@ -1,7 +1,7 @@
 """Runner - Agent运行引擎"""
 
 import json
-from typing import Callable, Generator, Optional
+from collections.abc import Callable, Generator
 
 from .agent import Agent
 from .context import Context
@@ -16,7 +16,7 @@ class RunResult:
         content: str,
         context: Context,
         success: bool = True,
-        error: Optional[str] = None,
+        error: str | None = None,
     ):
         self.content = content
         self.context = context
@@ -37,9 +37,9 @@ class Runner:
     def run(
         agent: Agent,
         user_input: str,
-        context: Optional[Context] = None,
+        context: Context | None = None,
         max_turns: int = 10,
-        stream_callback: Optional[Callable[[StreamEvent], None]] = None,
+        stream_callback: Callable[[StreamEvent], None] | None = None,
     ) -> RunResult:
         """
         运行Agent处理用户输入（基于 run_stream 实现）
@@ -54,6 +54,7 @@ class Runner:
         Returns:
             RunResult: 包含最终结果和上下文的对象
         """
+
         # 定义内部回调来处理流式事件
         def internal_callback(event: StreamEvent):
             # 如果有外部回调，先调用
@@ -73,14 +74,14 @@ class Runner:
                     print(f"\n✅ 回答：{event.content}")
                 elif event.type == StreamEventType.ERROR:
                     print(f"\n❌ 错误：{event.error}")
-        
+
         # 执行流式处理，收集最终结果
         try:
             # 使用生成器执行流式处理
             stream_generator = Runner.run_stream(
                 agent, user_input, context, max_turns
             )
-            
+
             # 遍历所有事件，并获取最终结果
             final_result = None
             try:
@@ -89,15 +90,20 @@ class Runner:
                     internal_callback(event)
             except StopIteration as e:
                 final_result = e.value
-            
-            return final_result or RunResult("", context or Context(), success=True)
-            
+
+            return final_result or RunResult(
+                "", context or Context(), success=True
+            )
+
         except Exception as e:
             # 处理其他异常
             error_msg = f"运行过程中出现错误: {e!s}"
-            return RunResult("", context or Context(), success=False, error=error_msg)
+            return RunResult(
+                "", context or Context(), success=False, error=error_msg
+            )
+
     @staticmethod
-    def chat(agent: Agent, context: Optional[Context] = None) -> Context:
+    def chat(agent: Agent, context: Context | None = None) -> Context:
         """
         启动交互式聊天模式
 
@@ -142,7 +148,7 @@ class Runner:
     def run_stream(
         agent: Agent,
         user_input: str,
-        context: Optional[Context] = None,
+        context: Context | None = None,
         max_turns: int = 10,
     ) -> Generator[StreamEvent, None, RunResult]:
         """
@@ -165,7 +171,7 @@ class Runner:
             context = Context()
             # 记录 Agent 信息
             context.last_agent = agent.name
-        
+
         # 如果是传入的 context，也更新 last_agent
         context.last_agent = agent.name
 
@@ -190,37 +196,54 @@ class Runner:
                 # 获取可用工具
                 tools = agent.get_tools_schema() if agent.tools else None
 
-                # 调用模型
+                # 调用模型流式API
                 assert agent.model is not None, (
                     "Agent model should not be None after initialization"
                 )
-                response = agent.model.generate(messages, tools)
+                stream_generator = agent.model.generate_stream(messages, tools)
 
-                # 累计使用量统计
-                context.usage.add(response.usage)
+                # 使用真正的流式处理
+                full_content = ""
+                response = None
 
-                # 如果有思考内容（content），逐字符处理
-                if response.content:
-                    # 根据是否有工具调用决定事件类型
+                for stream_item in stream_generator:
+                    # 导入ModelResponse用于类型检查
+                    from .model import ModelResponse
+                    
+                    if isinstance(stream_item, ModelResponse):
+                        # 这是最终的ModelResponse
+                        response = stream_item
+                        break
+                    elif (
+                        hasattr(stream_item, "content")
+                        and stream_item.content is not None
+                    ):
+                        # 这是StreamDelta，包含增量内容
+                        delta_content = stream_item.content
+                        full_content += delta_content
+
+                        # 实时yield增量内容
+                        yield StreamEvent.answer_delta(delta_content)
+
+                # 处理完整响应
+                if response:
+                    # 累计使用量统计
+                    context.usage.add(response.usage)
+
+                    # 检查是否有工具调用
                     if response.tool_calls:
-                        # 有工具调用，逐字符输出思考过程
-                        for char in response.content:
-                            yield StreamEvent.thinking_delta(char)
-                        # 发送思考完成事件
-                        yield StreamEvent.thinking(response.content)
+                        # 有工具调用，发送思考完成事件
+                        yield StreamEvent.thinking(full_content)
                         # 将思考内容添加到上下文
-                        context.add_message("assistant", response.content)
+                        context.add_message("assistant", full_content)
                     else:
-                        # 没有工具调用，逐字符输出最终回答
-                        for char in response.content:
-                            yield StreamEvent.answer_delta(char)
-                        # 发送回答完成事件
-                        yield StreamEvent.answer(response.content)
-                        context.add_message("assistant", response.content)
-                        return RunResult(response.content, context)
+                        # 没有工具调用，发送回答完成事件
+                        yield StreamEvent.answer(full_content)
+                        context.add_message("assistant", full_content)
+                        return RunResult(full_content, context)
 
                 # 如果有工具调用，执行工具
-                if response.tool_calls:
+                if response and response.tool_calls:
                     has_tool_results = False
 
                     for tool_call in response.tool_calls:
@@ -274,7 +297,7 @@ class Runner:
                         continue
 
                 # 如果既没有工具调用，也没有文本回复，说明出现了问题
-                if not response.tool_calls:
+                if not response or not response.tool_calls:
                     error_msg = "模型没有返回任何内容"
                     yield StreamEvent.create_error(error_msg)
                     return RunResult(
