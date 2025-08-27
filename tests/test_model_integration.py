@@ -35,7 +35,7 @@ class TestModelIntegration:
                     content="测试响应",
                     tool_calls=None,
                     usage=Usage(10, 20, 30),
-                    finish_reason="stop"
+                    finish_reason="stop",
                 )
 
         model = TestModel()
@@ -51,7 +51,13 @@ class TestModelIntegration:
         # 保存原始环境变量
         original_env = {
             key: os.environ.get(key)
-            for key in ["MODEL", "API_KEY", "BASE_URL", "TEMPERATURE", "MAX_TOKENS"]
+            for key in [
+                "MODEL",
+                "API_KEY",
+                "BASE_URL",
+                "TEMPERATURE",
+                "MAX_TOKENS",
+            ]
         }
 
         try:
@@ -93,14 +99,16 @@ class TestModelIntegration:
                 if self.call_count == 1 and tools:
                     return ModelResponse(
                         content="需要使用工具",
-                        tool_calls=[{
-                            "function": {
-                                "name": "test_tool",
-                                "arguments": '{"arg": "value"}'
+                        tool_calls=[
+                            {
+                                "function": {
+                                    "name": "test_tool",
+                                    "arguments": '{"arg": "value"}',
+                                }
                             }
-                        }],
+                        ],
                         usage=Usage(10, 20, 30),
-                        finish_reason="tool_calls"
+                        finish_reason="tool_calls",
                     )
 
                 # 第二次调用：返回最终结果
@@ -108,7 +116,7 @@ class TestModelIntegration:
                     content="工具调用完成",
                     tool_calls=None,
                     usage=Usage(15, 25, 40),
-                    finish_reason="stop"
+                    finish_reason="stop",
                 )
 
         from zipagent import function_tool
@@ -120,10 +128,7 @@ class TestModelIntegration:
 
         model = ToolModel()
         agent = Agent(
-            name="Test",
-            instructions="测试",
-            model=model,
-            tools=[test_tool]
+            name="Test", instructions="测试", model=model, tools=[test_tool]
         )
 
         result = Runner.run(agent, "使用工具")
@@ -160,7 +165,7 @@ class TestModelIntegration:
                     content="简单响应",
                     tool_calls=None,
                     usage=Usage(5, 10, 15),
-                    finish_reason="stop"
+                    finish_reason="stop",
                 )
 
         model = SimpleModel()
@@ -193,14 +198,12 @@ class TestModelIntegration:
                     content=f"温度设置: {temp}",
                     tool_calls=None,
                     usage=Usage(5, 10, 15),
-                    finish_reason="stop"
+                    finish_reason="stop",
                 )
 
         # 传递自定义参数
         model = CustomModel(
-            temperature=0.3,
-            max_tokens=500,
-            custom_option="test"
+            temperature=0.3, max_tokens=500, custom_option="test"
         )
 
         agent = Agent(name="Test", instructions="测试", model=model)
@@ -221,7 +224,7 @@ class TestModelRobustness:
                     content=None,
                     tool_calls=None,
                     usage=Usage(10, 0, 10),
-                    finish_reason="stop"
+                    finish_reason="stop",
                 )
 
         model = EmptyModel()
@@ -238,14 +241,16 @@ class TestModelRobustness:
             def generate(self, messages, tools=None):
                 return ModelResponse(
                     content="调用工具",
-                    tool_calls=[{
-                        "function": {
-                            "name": "test",
-                            "arguments": "not-a-json"  # 无效的 JSON
+                    tool_calls=[
+                        {
+                            "function": {
+                                "name": "test",
+                                "arguments": "not-a-json",  # 无效的 JSON
+                            }
                         }
-                    }],
+                    ],
                     usage=Usage(10, 20, 30),
-                    finish_reason="tool_calls"
+                    finish_reason="tool_calls",
                 )
 
         from zipagent import function_tool
@@ -256,17 +261,21 @@ class TestModelRobustness:
             return "ok"
 
         model = MalformedModel()
-        agent = Agent(name="Test", instructions="测试", model=model, tools=[test])
+        agent = Agent(
+            name="Test", instructions="测试", model=model, tools=[test]
+        )
 
         # 应该能处理无效的参数
         result = Runner.run(agent, "测试")
         # Runner 会用空参数继续执行
-        assert result.success is True or result.success is False  # 取决于具体实现
+        assert (
+            result.success is True or result.success is False
+        )  # 取决于具体实现
 
 
 @pytest.mark.skipif(
     not os.getenv("TEST_OPENAI_API"),
-    reason="需要设置 TEST_OPENAI_API 环境变量来运行真实 API 测试"
+    reason="需要设置 TEST_OPENAI_API 环境变量来运行真实 API 测试",
 )
 class TestRealAPI:
     """真实 API 测试（可选）"""
@@ -277,7 +286,7 @@ class TestRealAPI:
         agent = Agent(
             name="Test",
             instructions="You are a test assistant. Reply with exactly: TEST_OK",
-            model=model
+            model=model,
         )
 
         result = Runner.run(agent, "Hello")

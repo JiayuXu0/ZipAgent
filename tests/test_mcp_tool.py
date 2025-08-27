@@ -100,14 +100,12 @@ class TestMCPToolPool:
     @pytest.mark.asyncio
     async def test_add_mcp_server_without_mcp(self):
         """测试在没有 MCP SDK 的情况下添加服务器"""
-        with patch('zipagent.mcp_tool.MCP_AVAILABLE', False):
+        with patch("zipagent.mcp_tool.MCP_AVAILABLE", False):
             pool = _MCPToolPool()
 
             with pytest.raises(MCPNotAvailableError):
                 await pool.add_mcp_server(
-                    "test",
-                    command="echo",
-                    args=["hello"]
+                    "test", command="echo", args=["hello"]
                 )
 
     @pytest.mark.asyncio
@@ -171,8 +169,8 @@ class TestAgentIntegration:
                 "function": {
                     "name": f"mcp_tool_{i}",
                     "description": f"MCP tool {i}",
-                    "parameters": {}
-                }
+                    "parameters": {},
+                },
             }
             mock_mcp_tools.append(tool)
 
@@ -182,7 +180,7 @@ class TestAgentIntegration:
         agent = Agent(
             name="Test Agent",
             instructions="Test agent with mixed tools",
-            tools=[calculate, mcp_group]
+            tools=[calculate, mcp_group],
         )
 
         # 验证工具展开
@@ -210,8 +208,8 @@ class TestAgentIntegration:
             "function": {
                 "name": "search_location",
                 "description": "Search location",
-                "parameters": {}
-            }
+                "parameters": {},
+            },
         }
 
         mcp_group = MCPToolGroup("amap", [mock_tool])
@@ -219,7 +217,7 @@ class TestAgentIntegration:
         agent = Agent(
             name="Test Agent",
             instructions="Test",
-            tools=[calculate, mcp_group]
+            tools=[calculate, mcp_group],
         )
 
         # 测试查找
@@ -242,8 +240,8 @@ class TestAgentIntegration:
             "function": {
                 "name": "search_location",
                 "description": "Search location",
-                "parameters": {"type": "object", "properties": {}}
-            }
+                "parameters": {"type": "object", "properties": {}},
+            },
         }
 
         mcp_group = MCPToolGroup("amap", [mock_tool])
@@ -251,7 +249,7 @@ class TestAgentIntegration:
         agent = Agent(
             name="Test Agent",
             instructions="Test",
-            tools=[calculate, mcp_group]
+            tools=[calculate, mcp_group],
         )
 
         # 获取 schema
@@ -274,7 +272,7 @@ class TestMCPServerConfig:
             command="npx",
             args=["-y", "test-server"],
             env={"API_KEY": "test_key"},
-            tools=["tool1", "tool2"]
+            tools=["tool1", "tool2"],
         )
 
         assert config.name == "test"
@@ -285,10 +283,7 @@ class TestMCPServerConfig:
 
     def test_config_defaults(self):
         """测试配置默认值"""
-        config = MCPServerConfig(
-            name="test",
-            command="node"
-        )
+        config = MCPServerConfig(name="test", command="node")
 
         assert config.args == []
         assert config.env is None

@@ -1,18 +1,17 @@
 """测试异常系统"""
 
-
 from zipagent.exceptions import (
     ConfigurationError,
     ContextError,
-    ZipAgentError,
     MaxTurnsError,
     ModelError,
     ResponseParseError,
     StreamError,
+    TokenLimitError,
     ToolError,
     ToolExecutionError,
     ToolNotFoundError,
-    TokenLimitError,
+    ZipAgentError,
     create_error_with_context,
 )
 
@@ -48,9 +47,7 @@ class TestModelError:
     def test_model_error(self):
         """测试模型错误创建"""
         error = ModelError(
-            "API调用失败",
-            model_name="gpt-3.5-turbo",
-            status_code=429
+            "API调用失败", model_name="gpt-3.5-turbo", status_code=429
         )
         assert error.message == "API调用失败"
         assert error.details["model_name"] == "gpt-3.5-turbo"
@@ -69,9 +66,7 @@ class TestToolError:
     def test_tool_error(self):
         """测试工具错误创建"""
         error = ToolError(
-            "工具执行失败",
-            tool_name="calculator",
-            arguments={"a": 1, "b": 2}
+            "工具执行失败", tool_name="calculator", arguments={"a": 1, "b": 2}
         )
         assert error.message == "工具执行失败"
         assert error.details["tool_name"] == "calculator"
@@ -89,7 +84,7 @@ class TestToolError:
         error = ToolExecutionError(
             tool_name="api_call",
             arguments={"url": "http://example.com"},
-            error=original
+            error=original,
         )
         assert "工具 'api_call' 执行失败" in str(error)
         assert error.details["tool_name"] == "api_call"
@@ -182,7 +177,7 @@ class TestErrorWithContext:
             ModelError,
             "测试错误",
             agent_name="TestAgent",
-            user_input="这是一个很长的用户输入" * 20
+            user_input="这是一个很长的用户输入" * 20,
         )
 
         assert isinstance(error, ModelError)
@@ -194,10 +189,7 @@ class TestErrorWithContext:
 
     def test_create_error_minimal(self):
         """测试最小上下文错误"""
-        error = create_error_with_context(
-            ZipAgentError,
-            "简单错误"
-        )
+        error = create_error_with_context(ZipAgentError, "简单错误")
         assert error.message == "简单错误"
         assert "agent_name" not in error.details
         assert "user_input" not in error.details

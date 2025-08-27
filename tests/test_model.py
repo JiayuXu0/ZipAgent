@@ -55,7 +55,7 @@ class TestStreamDelta:
         delta = StreamDelta(
             content="测试内容",
             tool_calls=[{"function": {"name": "test"}}],
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
         assert delta.content == "测试内容"
@@ -81,7 +81,7 @@ class TestModelResponse:
             content="测试回复",
             tool_calls=[{"function": {"name": "test"}}],
             usage=usage,
-            finish_reason="stop"
+            finish_reason="stop",
         )
 
         assert response.content == "测试回复"
@@ -101,13 +101,14 @@ class TestModel:
 
     def test_model_generate_stream_default(self):
         """测试默认的流式生成实现"""
+
         class ConcreteModel(Model):
             def generate(self, messages, tools=None):
                 return ModelResponse(
                     content="测试内容",
                     tool_calls=None,
                     usage=Usage(10, 20, 30),
-                    finish_reason="stop"
+                    finish_reason="stop",
                 )
 
         model = ConcreteModel()
@@ -125,18 +126,24 @@ class TestModel:
 class TestOpenAIModel:
     """测试 OpenAIModel 类"""
 
-    @patch('openai.OpenAI')
-    @patch.dict('os.environ', {}, clear=False)  # 不清除所有环境变量
+    @patch("openai.OpenAI")
+    @patch.dict("os.environ", {}, clear=False)  # 不清除所有环境变量
     def test_openai_model_initialization(self, mock_openai):
         """测试 OpenAIModel 初始化"""
         # 确保测试环境变量不影响结果
-        for key in ['MODEL', 'API_KEY', 'BASE_URL', 'TEMPERATURE', 'MAX_TOKENS']:
+        for key in [
+            "MODEL",
+            "API_KEY",
+            "BASE_URL",
+            "TEMPERATURE",
+            "MAX_TOKENS",
+        ]:
             os.environ.pop(key, None)
-            
+
         model = OpenAIModel(
             model_name="gpt-3.5-turbo",
             api_key="test_key",
-            base_url="https://api.openai.com/v1"
+            base_url="https://api.openai.com/v1",
         )
 
         assert model.model_name == "gpt-3.5-turbo"
@@ -144,23 +151,26 @@ class TestOpenAIModel:
         assert model.max_tokens is None
         mock_openai.assert_called_once()
 
-    @patch('openai.OpenAI')
+    @patch("openai.OpenAI")
     def test_openai_model_from_env(self, mock_openai):
         """测试从环境变量初始化"""
-        with patch.dict('os.environ', {
-            'MODEL': 'gpt-4',
-            'API_KEY': 'env_key', 
-            'BASE_URL': 'https://custom.api.com/v1',
-            'TEMPERATURE': '0.7',
-            'MAX_TOKENS': '1000'
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "MODEL": "gpt-4",
+                "API_KEY": "env_key",
+                "BASE_URL": "https://custom.api.com/v1",
+                "TEMPERATURE": "0.7",
+                "MAX_TOKENS": "1000",
+            },
+        ):
             model = OpenAIModel()
 
             assert model.model_name == "gpt-4"
             assert model.temperature == 0.7
             assert model.max_tokens == 1000
 
-    @patch('openai.OpenAI')
+    @patch("openai.OpenAI")
     def test_openai_model_generate(self, mock_openai_class):
         """测试 generate 方法"""
         # 创建 mock client
@@ -198,7 +208,7 @@ class TestOpenAIModel:
         assert call_args[1]["model"] == "gpt-3.5-turbo"
         assert call_args[1]["messages"] == messages
 
-    @patch('openai.OpenAI')
+    @patch("openai.OpenAI")
     def test_openai_model_generate_with_tools(self, mock_openai_class):
         """测试带工具的 generate"""
         mock_client = MagicMock()
@@ -233,10 +243,13 @@ class TestOpenAIModel:
         assert response.tool_calls is not None
         assert len(response.tool_calls) == 1
         assert response.tool_calls[0]["function"]["name"] == "test_tool"
-        assert response.tool_calls[0]["function"]["arguments"] == '{"arg": "value"}'
+        assert (
+            response.tool_calls[0]["function"]["arguments"]
+            == '{"arg": "value"}'
+        )
         assert response.finish_reason == "tool_calls"
 
-    @patch('openai.OpenAI')
+    @patch("openai.OpenAI")
     def test_openai_model_generate_stream(self, mock_openai_class):
         """测试流式生成"""
         mock_client = MagicMock()
@@ -298,14 +311,16 @@ class TestOpenAIModel:
         call_args = mock_client.chat.completions.create.call_args
         assert call_args[1]["stream"] is True
 
-    @patch('openai.OpenAI')
+    @patch("openai.OpenAI")
     def test_openai_model_error_handling(self, mock_openai_class):
         """测试错误处理"""
         mock_client = MagicMock()
         mock_openai_class.return_value = mock_client
 
         # 模拟 API 错误
-        mock_client.chat.completions.create.side_effect = Exception("API Error")
+        mock_client.chat.completions.create.side_effect = Exception(
+            "API Error"
+        )
 
         model = OpenAIModel(model_name="gpt-3.5-turbo", api_key="test")
         messages = [{"role": "user", "content": "测试"}]

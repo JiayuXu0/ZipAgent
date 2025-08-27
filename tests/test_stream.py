@@ -1,6 +1,5 @@
 """测试 Stream 模块"""
 
-
 from zipagent.stream import StreamEvent, StreamEventType
 
 
@@ -30,7 +29,7 @@ class TestStreamEvent:
             tool_name="test_tool",
             tool_args={"arg": "value"},
             tool_result="结果",
-            error="错误信息"
+            error="错误信息",
         )
 
         assert event.type == StreamEventType.ANSWER
@@ -111,13 +110,13 @@ class TestStreamEvent:
         event = StreamEvent(
             type=StreamEventType.TOOL_CALL,
             tool_name="test",
-            tool_args={"x": 1}
+            tool_args={"x": 1},
         )
 
         # 测试可以访问属性
-        assert hasattr(event, 'type')
-        assert hasattr(event, 'tool_name')
-        assert hasattr(event, 'tool_args')
+        assert hasattr(event, "type")
+        assert hasattr(event, "tool_name")
+        assert hasattr(event, "tool_args")
 
         # 验证值
         assert event.type == StreamEventType.TOOL_CALL

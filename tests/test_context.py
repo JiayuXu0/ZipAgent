@@ -1,6 +1,5 @@
 """Context 模块测试"""
 
-import uuid
 from datetime import datetime
 
 from zipagent import Context
@@ -119,10 +118,10 @@ class TestContext:
         assert context.context_id is not None
         assert isinstance(context.context_id, str)
         assert len(context.context_id) == 36  # UUID 长度
-        
+
         assert isinstance(context.created_at, datetime)
         assert context.created_at <= datetime.now()
-        
+
         assert context.last_agent is None
         assert context.turn_count == 0
 
@@ -130,7 +129,7 @@ class TestContext:
         """测试 Context ID 唯一性"""
         context1 = Context()
         context2 = Context()
-        
+
         assert context1.context_id != context2.context_id
 
     def test_get_summary(self) -> None:
@@ -229,17 +228,17 @@ class TestContext:
     def test_context_evolution(self) -> None:
         """测试 Context 在对话过程中的演进"""
         context = Context()
-        
+
         # 模拟对话进程
         context.last_agent = "Agent1"
         context.turn_count = 1
         context.add_message("user", "第一个问题")
-        
+
         # 切换Agent
         context.last_agent = "Agent2"
         context.turn_count = 2
         context.add_message("assistant", "Agent2的回复")
-        
+
         # 验证状态
         assert context.last_agent == "Agent2"
         assert context.turn_count == 2
@@ -250,9 +249,9 @@ class TestContext:
         original = Context()
         original.last_agent = "TestAgent"
         original.turn_count = 5
-        
+
         cloned = original.clone()
-        
+
         # 元数据应该保持一致
         assert cloned.last_agent == "TestAgent"
         assert cloned.turn_count == 5
