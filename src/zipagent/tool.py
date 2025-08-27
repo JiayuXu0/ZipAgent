@@ -1,8 +1,9 @@
 """Tool - 工具系统模块"""
 
 import inspect
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Union, get_type_hints
+from typing import Any, get_type_hints
 
 
 @dataclass
@@ -10,10 +11,10 @@ class ToolResult:
     """工具执行结果"""
 
     name: str
-    arguments: Dict[str, Any]
+    arguments: dict[str, Any]
     result: Any
     success: bool = True
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class Tool:
@@ -27,7 +28,7 @@ class Tool:
         self.function = function
         self.schema = self._generate_schema()
 
-    def _generate_schema(self) -> Dict[str, Any]:
+    def _generate_schema(self) -> dict[str, Any]:
         """生成工具的JSON Schema"""
         sig = inspect.signature(self.function)
         type_hints = get_type_hints(self.function)
@@ -72,7 +73,7 @@ class Tool:
             },
         }
 
-    def execute(self, arguments: Dict[str, Any]) -> ToolResult:
+    def execute(self, arguments: dict[str, Any]) -> ToolResult:
         """执行工具"""
         try:
             result = self.function(**arguments)
@@ -91,17 +92,17 @@ class Tool:
                 error=str(e),
             )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式，用于API调用"""
         return self.schema
 
 
 def function_tool(
-    func: Optional[Callable[..., Any]] = None,
+    func: Callable[..., Any] | None = None,
     *,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
-) -> Union[Callable[[Callable[..., Any]], Tool], Tool]:
+    name: str | None = None,
+    description: str | None = None,
+) -> Callable[[Callable[..., Any]], Tool] | Tool:
     """
     将Python函数转换为Tool的装饰器
 

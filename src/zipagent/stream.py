@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class StreamEventType(Enum):
@@ -23,12 +23,12 @@ class StreamEvent:
     """流式事件数据类"""
 
     type: StreamEventType
-    content: Optional[str] = None
-    tool_name: Optional[str] = None
-    tool_args: Optional[Dict[str, Any]] = None
-    tool_result: Optional[str] = None
-    error: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    content: str | None = None
+    tool_name: str | None = None
+    tool_args: dict[str, Any] | None = None
+    tool_result: str | None = None
+    error: str | None = None
+    metadata: dict[str, Any] | None = None
 
     def __post_init__(self):
         """确保事件类型是 StreamEventType 枚举"""
@@ -52,7 +52,7 @@ class StreamEvent:
 
     @classmethod
     def tool_call(
-        cls, tool_name: str, tool_args: Dict[str, Any]
+        cls, tool_name: str, tool_args: dict[str, Any]
     ) -> "StreamEvent":
         """创建工具调用事件"""
         return cls(

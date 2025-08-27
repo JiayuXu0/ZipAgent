@@ -2,7 +2,7 @@
 
 import os
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Union
 
 from .model import Model, OpenAIModel
 from .tool import Tool
@@ -18,16 +18,16 @@ class Agent:
     instructions: str
     """系统指令"""
 
-    model: Optional[Model] = None
+    model: Model | None = None
     """使用的LLM模型"""
 
-    tools: List[Union[Tool, "MCPToolGroup"]] = field(default_factory=list)
+    tools: list[Union[Tool, "MCPToolGroup"]] = field(default_factory=list)
     """可用工具列表，支持 Tool 和 MCPToolGroup"""
 
     use_system_prompt: bool = True
     """是否启用默认系统提示"""
 
-    system_prompt_file: Optional[str] = "system.md"
+    system_prompt_file: str | None = "system.md"
     """系统提示文件名，默认为 system.md（在 liteagent 包目录下）"""
 
     def __post_init__(self) -> None:
@@ -39,7 +39,7 @@ class Agent:
         # 展开 MCPToolGroup 为实际的工具列表
         self._expand_tool_groups()
 
-    def get_system_message(self) -> Dict[str, str]:
+    def get_system_message(self) -> dict[str, str]:
         """获取系统消息"""
         system_content = self.instructions
 
@@ -59,7 +59,7 @@ class Agent:
 
         return {"role": "system", "content": system_content}
 
-    def _load_system_prompt(self) -> Optional[str]:
+    def _load_system_prompt(self) -> str | None:
         """加载系统提示文件"""
         if not self.system_prompt_file:
             return None
@@ -97,11 +97,11 @@ class Agent:
             # 读取失败时静默忽略
             return None
 
-    def get_tools_schema(self) -> List[Dict[str, Any]]:
+    def get_tools_schema(self) -> list[dict[str, Any]]:
         """获取工具的schema定义"""
         return [tool.to_dict() for tool in self._get_all_tools()]
 
-    def find_tool(self, name: str) -> Optional[Tool]:
+    def find_tool(self, name: str) -> Tool | None:
         """根据名称查找工具"""
         for tool in self._get_all_tools():
             if tool.name == name:
@@ -126,7 +126,7 @@ class Agent:
         """展开工具组（内部方法，已废弃，保持向后兼容）"""
         pass
 
-    def _get_all_tools(self) -> List[Tool]:
+    def _get_all_tools(self) -> list[Tool]:
         """获取所有工具的扁平化列表"""
         all_tools = []
         for item in self.tools:

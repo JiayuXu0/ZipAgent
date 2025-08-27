@@ -1,11 +1,12 @@
 """Simple Agent Framework - 简化的Agent框架实现"""
 
+__version__ = "0.1.6"
+
 from .agent import Agent
 from .context import Context
 from .exceptions import (
     ConfigurationError,
     ContextError,
-    ZipAgentError,
     MaxTurnsError,
     ModelError,
     ResponseParseError,
@@ -14,6 +15,7 @@ from .exceptions import (
     ToolError,
     ToolExecutionError,
     ToolNotFoundError,
+    ZipAgentError,
 )
 from .model import LiteLLMModel, Model, ModelResponse, OpenAIModel, StreamDelta
 from .runner import Runner, RunResult

@@ -3,7 +3,7 @@
 提供结构化的异常类型，帮助用户准确识别和处理错误。
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class ZipAgentError(Exception):
@@ -12,8 +12,8 @@ class ZipAgentError(Exception):
     def __init__(
         self,
         message: str,
-        details: Optional[Dict[str, Any]] = None,
-        original_error: Optional[Exception] = None
+        details: dict[str, Any] | None = None,
+        original_error: Exception | None = None,
     ):
         super().__init__(message)
         self.message = message
@@ -32,9 +32,9 @@ class ModelError(ZipAgentError):
     def __init__(
         self,
         message: str,
-        model_name: Optional[str] = None,
-        status_code: Optional[int] = None,
-        **kwargs
+        model_name: str | None = None,
+        status_code: int | None = None,
+        **kwargs,
     ):
         details = {"model_name": model_name, "status_code": status_code}
         super().__init__(message, details, **kwargs)
@@ -47,8 +47,8 @@ class ToolError(ZipAgentError):
         self,
         message: str,
         tool_name: str,
-        arguments: Optional[Dict[str, Any]] = None,
-        **kwargs
+        arguments: dict[str, Any] | None = None,
+        **kwargs,
     ):
         details = {"tool_name": tool_name, "arguments": arguments}
         super().__init__(message, details, **kwargs)
@@ -58,31 +58,26 @@ class ToolNotFoundError(ToolError):
     """找不到指定的工具"""
 
     def __init__(self, tool_name: str):
-        super().__init__(
-            f"找不到工具: {tool_name}",
-            tool_name=tool_name
-        )
+        super().__init__(f"找不到工具: {tool_name}", tool_name=tool_name)
 
 
 class ToolExecutionError(ToolError):
     """工具执行失败"""
 
     def __init__(
-        self,
-        tool_name: str,
-        arguments: Dict[str, Any],
-        error: Exception
+        self, tool_name: str, arguments: dict[str, Any], error: Exception
     ):
         super().__init__(
             f"工具 '{tool_name}' 执行失败",
             tool_name=tool_name,
             arguments=arguments,
-            original_error=error
+            original_error=error,
         )
 
 
 class ContextError(ZipAgentError):
     """上下文管理相关错误"""
+
     pass
 
 
@@ -90,10 +85,7 @@ class TokenLimitError(ContextError):
     """Token 限制错误"""
 
     def __init__(
-        self,
-        current_tokens: int,
-        max_tokens: int,
-        message: Optional[str] = None
+        self, current_tokens: int, max_tokens: int, message: str | None = None
     ):
         msg = message or f"Token 数量超过限制: {current_tokens} > {max_tokens}"
         details = {"current_tokens": current_tokens, "max_tokens": max_tokens}
@@ -106,19 +98,14 @@ class MaxTurnsError(ZipAgentError):
     def __init__(self, max_turns: int):
         super().__init__(
             f"达到最大执行轮次 ({max_turns})，可能存在无限循环",
-            details={"max_turns": max_turns}
+            details={"max_turns": max_turns},
         )
 
 
 class ResponseParseError(ZipAgentError):
     """响应解析错误"""
 
-    def __init__(
-        self,
-        message: str,
-        raw_response: Any = None,
-        **kwargs
-    ):
+    def __init__(self, message: str, raw_response: Any = None, **kwargs):
         details = {"raw_response": str(raw_response)[:500]}  # 限制长度
         super().__init__(message, details, **kwargs)
 
@@ -126,13 +113,14 @@ class ResponseParseError(ZipAgentError):
 class ConfigurationError(ZipAgentError):
     """配置错误"""
 
-    def __init__(self, message: str, config_key: Optional[str] = None):
+    def __init__(self, message: str, config_key: str | None = None):
         details = {"config_key": config_key} if config_key else {}
         super().__init__(message, details)
 
 
 class StreamError(ZipAgentError):
     """流式处理相关错误"""
+
     pass
 
 
@@ -140,18 +128,18 @@ class StreamError(ZipAgentError):
 def create_error_with_context(
     error_class: type,
     message: str,
-    agent_name: Optional[str] = None,
-    user_input: Optional[str] = None,
-    **kwargs
+    agent_name: str | None = None,
+    user_input: str | None = None,
+    **kwargs,
 ) -> ZipAgentError:
     """创建带有执行上下文的异常"""
     # 创建错误实例
     error = error_class(message, **kwargs)
-    
+
     # 添加上下文信息到 details
     if agent_name:
         error.details["agent_name"] = agent_name
     if user_input:
         error.details["user_input"] = user_input[:100]  # 限制长度
-    
+
     return error

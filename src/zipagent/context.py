@@ -3,7 +3,7 @@
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -25,13 +25,13 @@ class Usage:
 class Context:
     """Agent运行上下文，管理对话历史、状态和统计信息"""
 
-    messages: List[Dict[str, Any]] = field(default_factory=list)
+    messages: list[dict[str, Any]] = field(default_factory=list)
     """对话消息历史"""
 
     usage: Usage = field(default_factory=Usage)
     """Token使用统计"""
 
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     """自定义数据存储"""
 
     # === 新增元数据字段 ===
@@ -41,7 +41,7 @@ class Context:
     created_at: datetime = field(default_factory=datetime.now)
     """创建时间"""
 
-    last_agent: Optional[str] = None
+    last_agent: str | None = None
     """最后使用的 Agent 名称"""
 
     turn_count: int = 0
@@ -55,7 +55,7 @@ class Context:
         self.messages.append(message)
 
     def add_tool_call(
-        self, tool_name: str, arguments: Dict[str, Any], result: Any
+        self, tool_name: str, arguments: dict[str, Any], result: Any
     ) -> None:
         """添加工具调用记录"""
         # 添加助手的工具调用消息
@@ -85,7 +85,7 @@ class Context:
             }
         )
 
-    def get_messages_for_api(self) -> List[Dict[str, Any]]:
+    def get_messages_for_api(self) -> list[dict[str, Any]]:
         """获取适合API调用的消息格式"""
         return self.messages.copy()
 
@@ -102,7 +102,7 @@ class Context:
         self.messages.clear()
         self.turn_count = 0
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """获取上下文摘要信息"""
         return {
             "context_id": self.context_id,
