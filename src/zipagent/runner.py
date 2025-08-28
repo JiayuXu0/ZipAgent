@@ -5,6 +5,7 @@ from collections.abc import Callable, Generator
 
 from .agent import Agent
 from .context import Context
+from .model import ModelResponse
 from .stream import StreamEvent, StreamEventType
 
 
@@ -188,28 +189,25 @@ class Runner:
             # 发送问题事件
             yield StreamEvent.question(user_input)
 
+            # 预先缓存工具schema，避免在循环中重复计算
+            tools_schema = agent.get_tools_schema() if agent.tools else None
+
             # 主执行循环
             for turn in range(max_turns):
                 # 获取当前消息列表
                 messages = context.get_messages_for_api()
 
-                # 获取可用工具
-                tools = agent.get_tools_schema() if agent.tools else None
-
                 # 调用模型流式API
                 assert agent.model is not None, (
                     "Agent model should not be None after initialization"
                 )
-                stream_generator = agent.model.generate_stream(messages, tools)
+                stream_generator = agent.model.generate_stream(messages, tools_schema)
 
                 # 使用真正的流式处理
                 full_content = ""
                 response = None
 
                 for stream_item in stream_generator:
-                    # 导入ModelResponse用于类型检查
-                    from .model import ModelResponse
-                    
                     if isinstance(stream_item, ModelResponse):
                         # 这是最终的ModelResponse
                         response = stream_item
