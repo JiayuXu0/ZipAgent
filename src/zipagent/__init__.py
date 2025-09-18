@@ -1,6 +1,6 @@
 """Simple Agent Framework - 简化的Agent框架实现"""
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 
 from .agent import Agent
 from .context import Context
@@ -32,7 +32,6 @@ except ImportError:
     MCPTool = None
     MCPToolGroup = None
 
-__version__ = "0.1.0"
 
 __all__ = [
     # 核心类

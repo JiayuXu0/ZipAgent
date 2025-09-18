@@ -215,29 +215,59 @@ class OpenAIModel(Model):
             usage = Usage()
 
             # 处理流式响应
-            for chunk in stream:
-                if chunk.choices:
-                    delta = chunk.choices[0].delta
+            last_chunk = None
+            try:
+                for chunk in stream:
+                    last_chunk = chunk
 
-                    # 处理内容增量
-                    if delta.content:
-                        full_content += delta.content
-                        yield StreamDelta(content=delta.content)
+                    # 确保choices存在且不为空
+                    if chunk.choices and len(chunk.choices) > 0:
+                        delta = chunk.choices[0].delta
 
-                    # 处理工具调用（通常一次性返回）
-                    if delta.tool_calls:
-                        # TODO: 处理工具调用流式
-                        pass
+                        # 处理内容增量
+                        if hasattr(delta, 'content') and delta.content:
+                            full_content += delta.content
+                            yield StreamDelta(content=delta.content)
 
-                    # 处理结束原因
-                    if chunk.choices[0].finish_reason:
-                        finish_reason = chunk.choices[0].finish_reason
+                        # 处理工具调用（流式累积）
+                        if hasattr(delta, 'tool_calls') and delta.tool_calls:
+                            # 流式工具调用处理
+                            for tool_call_delta in delta.tool_calls:
+                                index = tool_call_delta.index
+
+                                # 确保tool_calls列表足够长
+                                while len(tool_calls) <= index:
+                                    tool_calls.append({
+                                        "id": "",
+                                        "type": "function",
+                                        "function": {"name": "", "arguments": ""}
+                                    })
+
+                                # 累积工具调用信息
+                                if hasattr(tool_call_delta, 'id') and tool_call_delta.id:
+                                    tool_calls[index]["id"] = tool_call_delta.id
+
+                                if hasattr(tool_call_delta, 'function') and tool_call_delta.function:
+                                    if hasattr(tool_call_delta.function, 'name') and tool_call_delta.function.name:
+                                        tool_calls[index]["function"]["name"] = tool_call_delta.function.name
+
+                                    if hasattr(tool_call_delta.function, 'arguments') and tool_call_delta.function.arguments:
+                                        tool_calls[index]["function"]["arguments"] += tool_call_delta.function.arguments
+
+                        # 处理结束原因
+                        if hasattr(chunk.choices[0], 'finish_reason') and chunk.choices[0].finish_reason:
+                            finish_reason = chunk.choices[0].finish_reason
+            except Exception as stream_error:
+                # 流式解析错误，但保留已经获得的内容和工具调用
+                # 这通常是由于API服务器返回格式不正确的SSE数据导致的
+                # 我们优雅地处理这个错误，保留已经成功解析的内容
+                pass
 
             # 解析使用量（在流式响应的最后一个chunk中）
-            if hasattr(chunk, "usage") and chunk.usage:
-                usage.input_tokens = chunk.usage.prompt_tokens or 0
-                usage.output_tokens = chunk.usage.completion_tokens or 0
-                usage.total_tokens = chunk.usage.total_tokens or 0
+            if last_chunk and hasattr(last_chunk, "usage") and last_chunk.usage:
+                usage.input_tokens = last_chunk.usage.prompt_tokens or 0
+                usage.output_tokens = last_chunk.usage.completion_tokens or 0
+                usage.total_tokens = last_chunk.usage.total_tokens or 0
 
             # 最后yield完整的响应
             yield ModelResponse(
