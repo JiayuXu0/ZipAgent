@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zipagent"
-version = "0.1.8"
+version = "0.1.9"
 description = "轻量级的 AI Agent 框架"
 readme = "README.md"
 license = {text = "MIT"}
