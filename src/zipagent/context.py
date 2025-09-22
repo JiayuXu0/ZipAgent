@@ -1,5 +1,6 @@
 """Context - 上下文管理模块"""
 
+import json
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -58,32 +59,58 @@ class Context:
         self, tool_name: str, arguments: dict[str, Any], result: Any
     ) -> None:
         """添加工具调用记录"""
-        # 添加助手的工具调用消息
-        self.messages.append(
-            {
-                "role": "assistant",
-                "content": None,
-                "tool_calls": [
-                    {
-                        "id": f"call_{len(self.messages)}",
-                        "type": "function",
-                        "function": {
-                            "name": tool_name,
-                            "arguments": str(arguments),
-                        },
-                    }
-                ],
-            }
+        arguments_json = json.dumps(arguments, ensure_ascii=False)
+        result_content = (
+            result
+            if isinstance(result, str)
+            else json.dumps(result, ensure_ascii=False)
         )
+        # 检查最后一条消息是否已经是包含工具调用的assistant消息
+        if (self.messages and
+            self.messages[-1]["role"] == "assistant" and
+            self.messages[-1].get("tool_calls") is not None):
+            # 追加到现有的tool_calls列表
+            tool_call_id = f"call_{len(self.messages)}"
+            self.messages[-1]["tool_calls"].append({
+                "id": tool_call_id,
+                "type": "function",
+                "function": {
+                    "name": tool_name,
+                    "arguments": arguments_json,
+                },
+            })
+        else:
+            # 创建新的assistant消息（第一个工具调用）
+            # 检查是否有之前的思考内容需要合并
+            thinking_content = ""
+            if (self.messages and
+                self.messages[-1]["role"] == "assistant" and
+                self.messages[-1].get("tool_calls") is None):
+                # 移除并获取思考内容
+                last_message = self.messages.pop()
+                thinking_content = last_message.get("content", "")
+
+            tool_call_id = f"call_{len(self.messages)}"
+            self.messages.append({
+                "role": "assistant",
+                "content": thinking_content if thinking_content else None,
+                "tool_calls": [{
+                    "id": tool_call_id,
+                    "type": "function",
+                    "function": {
+                        "name": tool_name,
+                        "arguments": arguments_json,
+                    },
+                }],
+            })
 
         # 添加工具执行结果
-        self.messages.append(
-            {
-                "role": "tool",
-                "content": str(result),
-                "tool_call_id": f"call_{len(self.messages) - 1}",
-            }
-        )
+        self.messages.append({
+            "role": "tool",
+            "name": tool_name,
+            "content": result_content,
+            "tool_call_id": tool_call_id,
+        })
 
     def get_messages_for_api(self) -> list[dict[str, Any]]:
         """获取适合API调用的消息格式"""

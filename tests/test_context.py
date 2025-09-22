@@ -70,10 +70,15 @@ class TestContext:
         assert (
             assistant_msg["tool_calls"][0]["function"]["name"] == "test_tool"
         )
+        assert (
+            assistant_msg["tool_calls"][0]["function"]["arguments"]
+            == '{"arg1": "value1"}'
+        )
 
         # 检查工具结果消息
         tool_msg = sample_context.messages[1]
         assert tool_msg["role"] == "tool"
+        assert tool_msg["name"] == "test_tool"
         assert tool_msg["content"] == "tool_result"
 
     def test_get_messages_for_api(self, sample_context: Context) -> None:
@@ -86,6 +91,24 @@ class TestContext:
         assert len(messages) == 2
         assert messages is not sample_context.messages  # 应该是副本
         assert messages[0]["content"] == "你好"
+
+    def test_add_tool_call_serializes_structured_result(
+        self, sample_context: Context
+    ) -> None:
+        """工具调用参数与结果应序列化为标准 JSON"""
+        sample_context.add_tool_call(
+            "json_tool",
+            {"query": "python"},
+            {"items": [1, 2]},
+        )
+
+        assistant_msg = sample_context.messages[0]
+        assert assistant_msg["tool_calls"][0]["function"]["arguments"] == (
+            '{"query": "python"}'
+        )
+
+        tool_msg = sample_context.messages[1]
+        assert tool_msg["content"] == '{"items": [1, 2]}'
 
     def test_set_and_get_data(self, sample_context: Context) -> None:
         """测试设置和获取数据"""
