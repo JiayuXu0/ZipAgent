@@ -21,3 +21,9 @@ Commits follow Conventional Commit prefixes (`feat:`, `fix:`, `docs:`, etc.) wit
 
 ## Agent-Specific Notes
 Document non-obvious behaviors in module docstrings or `docs/`. When adding model backends in `model.py`, provide an example under `examples/` and record required environment variables (e.g., `OPENAI_API_KEY`) to prevent setup surprises.
+
+## Cursor Cloud specific instructions
+- The image does not include `uv`. Install it with the official installer and link `uv` and `uvx` into `/usr/local/bin`, then run `uv sync --frozen --python /usr/bin/python3.12` from the repository root. Python 3.12 is already at `/usr/bin/python3.12`.
+- `python3 -m venv` fails because `ensurepip` is not installed. Create environments with `uv venv`.
+- `Agent()` constructs `OpenAIModel`, which reads `API_KEY` from the environment (see `.env.example`), not `OPENAI_API_KEY`. A non-empty placeholder is enough for unit tests that only construct the client. Tests that call a live API stay skipped unless `TEST_OPENAI_API` is set. Do not commit real keys.
+- On current `master`, `uv run ruff check .` and `uv run pyright` report existing fullwidth-punctuation and strict-type issues, and `uv run pytest` has existing failures in `tests/test_runner.py` and `tests/test_model_integration.py`. Those failures are in the tree; they are not missing packages.
